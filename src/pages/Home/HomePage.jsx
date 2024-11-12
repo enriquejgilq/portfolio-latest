@@ -97,8 +97,9 @@ export default function Component() {
                 options={options}
                 onChange={handleSelection}
                 onInputChange={handleInputChange}
-                renderOption={(props, option) => (
+                renderOption={(props, option, index) => (
                   <li
+                    key={index}
                     {...props}
                     className="flex items-center space-x-2 cursor-pointer p-1"
                   >
@@ -144,15 +145,15 @@ export default function Component() {
 
             <List>
               {tendencies.map((item, index) => (
-                <>
-                  <ListItem key={index}>
+                <div key={index}>
+                  <ListItem>
                     <div className="flex items-center gap-2">
                       <TrendingUpIcon />
                       <ListItemText primary={item.title} />
                     </div>
                   </ListItem>
                   <Divider component="li" />
-                </>
+                </div>
               ))}
             </List>
           </div>

@@ -8,7 +8,6 @@ import Chip from "@mui/material/Chip";
 import LaptopChromebookIcon from "@mui/icons-material/LaptopChromebook";
 import ArrowBackSharpIcon from "@mui/icons-material/ArrowBackSharp";
 import Logo from "../../components/Logo";
-import img1 from "./1.jpeg";
 
 export const PageDetails = () => {
   const navigate = useNavigate();
