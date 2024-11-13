@@ -1,17 +1,23 @@
-name: Lint
+name: Lint Code Base
 
-on: pull_request
-
+on:
+  push:
+    branches: ["main"]
+  pull_request:
+    branches: ["main"]
 jobs:
-  eslint:
+  run-lint:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
-      - uses: mrdivyansh/eslint-action@v1.0.7
-        # GITHUB_TOKEN in forked repositories is read-only
-        # https://help.github.com/en/actions/reference/events-that-trigger-workflows#pull-request-event-pull_request
-        if: ${{ github.event_name == 'push' || github.event.pull_request.head.repo.full_name == github.repository }}
+      - name: Checkout code
+        uses: actions/checkout@v4
         with:
-          repo-token: ${{secrets.GITHUB_TOKEN}}
-          eslint-rc: .eslintrc.js
-          execute-on-files: "src/**/*.jsx"
+          # Full git history is needed to get a proper list of changed files within `super-linter`
+          fetch-depth: 0
+
+      - name: Lint Code Base
+        uses: github/super-linter@v4
+        env:
+          VALIDATE_ALL_CODEBASE: false
+          DEFAULT_BRANCH: "main"
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
