@@ -20,5 +20,8 @@ jobs:
       - name: Install dependencies
         run: npm install
 
-      - name: Show message_
-        run: echo "El valor del secreto es ${{ secrets.MY_SECRET }}"
+      - name: Get project name from package.json
+        id: get_project_name
+        run: |
+          PROJECT_NAME=$(jq -r '.name' package.json)
+          echo "PROJECT_NAME=$PROJECT_NAME" >> $GITHUB_ENV
