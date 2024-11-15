@@ -19,3 +19,6 @@ jobs:
 
       - name: Install dependencies
         run: npm install
+
+      - name: Show message
+        run: echo "El valor del secreto es ${{ secrets.MY_SECRET }}"
