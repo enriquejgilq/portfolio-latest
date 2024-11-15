@@ -24,4 +24,5 @@ jobs:
         id: get_project_name
         run: |
           PROJECT_NAME=$(jq -r '.name' package.json)
-          echo "PROJECT_NAME=$PROJECT_NAME" >> $GITHUB_ENV
+          echo "PROJECT_NAME=$PROJECT_NAME"  # Imprimir en consola
+          echo "PROJECT_NAME=$PROJECT_NAME" >> $GITHUB_ENV  # Exportar como variable de entorno para los siguientes pasos
