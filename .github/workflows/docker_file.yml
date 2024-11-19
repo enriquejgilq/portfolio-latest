@@ -17,5 +17,5 @@ jobs:
         env:
           BD_MONGO_URL: ${{ secrets.BD_MONGO_URL }}
         run: |
-          docker build -t my-app:latest --build-arg BD_MONGO_URL=$BD_MONGO_URL .
-          echo "Docker image built successfully"
+          docker build -t $REGISTRY/$REPOSITORY:$IMAGE_TAG --build-arg BD_MONGO_URL=$BD_MONGO_URL .
+          echo "image=$REGISTRY/$REPOSITORY:$IMAGE_TAG" >> "$GITHUB_OUTPUT"
