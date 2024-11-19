@@ -1,0 +1,33 @@
+name: Build Docker Image and Display in Console
+
+on:
+  push:
+    branches:
+      - main # Ejecutar el flujo al hacer push en la rama `main`
+
+jobs:
+  build-and-display:
+    runs-on: ubuntu-latest
+
+    steps:
+      # Paso 1: Clonar el repositorio
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      # Paso 2: Configurar Docker
+      - name: Set up Docker
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y docker.io
+          docker --version
+
+      # Paso 3: Construir la imagen Docker
+      - name: Build Docker Image
+        run: |
+          docker build -t my-app:latest .  # Construir imagen con el tag `my-app:latest`
+
+      # Paso 4: Listar las imágenes Docker
+      - name: List Docker Images
+        run: |
+          echo "Mostrando imágenes Docker disponibles:"
+          docker images
