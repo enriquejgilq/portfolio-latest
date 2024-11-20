@@ -1,18 +1,53 @@
-name: Image CI Build
+name: Build and Deploy Docker Image to EC2
 
 on:
-  pull_request:
-    branches: ["main"]
+  push:
+    branches:
+      - feature/dev-test
 
 jobs:
-  image_build:
+  deploy:
     runs-on: ubuntu-latest
+    env:
+      IMAGE_NAME: private-api-backend
     steps:
       - name: Checkout repo
         uses: actions/checkout@v4
 
-      - name: Build docker image
+      - name: Build Docker Image
         env:
           BD_MONGO_URL: ${{ secrets.BD_MONGO_URL }}
         run: |
-          docker build -t my-app:latest --build-arg BD_MONGO_URL=$BD_MONGO_URL .
+          docker build -t $IMAGE_NAME:latest --build-arg BD_MONGO_URL=$BD_MONGO_URL .
+
+      - name: Save Docker image as tar
+        run: |
+          docker save $IMAGE_NAME:latest -o $IMAGE_NAME.tar
+
+      - name: Write SSH private key to file
+        run: |
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" | tr -d '\r' > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+
+      - name: Transfer Docker image to EC2
+        run: |
+          scp -i ~/.ssh/id_rsa $IMAGE_NAME.tar ubuntu@${{ secrets.EC2_PUBLIC_IP }}:/home/ubuntu/docker_images/$IMAGE_NAME.tar
+
+      - name: Deploy Docker Container on EC2 with PM2
+        run: |
+          ssh -i ~/.ssh/id_rsa ubuntu@${{ secrets.EC2_PUBLIC_IP }} << EOF
+            cd /home/ubuntu/docker_images
+
+            docker stop $IMAGE_NAME || true
+            docker rm $IMAGE_NAME || true
+
+            docker load < $IMAGE_NAME.tar
+
+            echo "#!/bin/bash" > start-container.sh
+            echo "docker run -d -p 3000:3000 --name $IMAGE_NAME $IMAGE_NAME:latest" >> start-container.sh
+            chmod +x start-container.sh
+
+            pm2 delete $IMAGE_NAME || true 
+            pm2 start ./start-container.sh --name $IMAGE_NAME
+            pm2 save
+          EOF

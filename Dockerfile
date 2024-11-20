@@ -1,17 +1,22 @@
-FROM node:20
+FROM node:20.16.0
 
-# Crear el directorio de trabajo
-WORKDIR /app
+ WORKDIR /app
 
-# Copiar archivos necesarios
-COPY package*.json ./
+ COPY package*.json ./
 RUN npm install
 COPY . .
 
-# Argumento para la URL de MongoDB
-ARG BD_MONGO_URL
+ ARG BD_MONGO_URL
 ENV BD_MONGO_URL=$BD_MONGO_URL
 
-# Exponer el puerto y ejecutar la aplicación
-EXPOSE 5173
+ EXPOSE 3000
 CMD ["npm", "start"]
+
+
+##1esLinter
+##2Unit test 
+##3integration test  
+##4Conectar al ec2 git pull 
+##5migrations 
+##6comando pm2 
+## githubactions marketplace 
