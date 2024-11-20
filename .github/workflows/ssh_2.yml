@@ -1,4 +1,4 @@
-name: Build and Deploy Docker Image to EC2
+name: Deploy Code to EC2
 
 on:
   push:
@@ -9,7 +9,6 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     env:
-      IMAGE_NAME: private-api-backend
       EC2_SSH_PRIVATE_KEY: ${{ secrets.EC2_SSH_PRIVATE_KEY }}
       EC2_URL: ${{ secrets.EC2_URL }}
       EC2_USERNAME: ${{ secrets.EC2_USERNAME }}
@@ -24,10 +23,13 @@ jobs:
           EC2_SSH_PRIVATE_KEY: $EC2_SSH_PRIVATE_KEY
           EC2_URL: $EC2_URL
 
+      - name: Save SSH private key to a file
+        run: echo "$EC2_SSH_PRIVATE_KEY" > private_key.pem && chmod 600 private_key.pem
+
       - name: Verify remote directory exists (and create it if it doesn't)
         run: |
-          ssh -o StrictHostKeyChecking=no -i $EC2_SSH_PRIVATE_KEY $EC2_USERNAME@$EC2_URL "mkdir -p /home/ubuntu/docker_images"
+          ssh -o StrictHostKeyChecking=no -i private_key.pem $EC2_USERNAME@$EC2_URL "mkdir -p /home/ubuntu/docker_images"
 
       - name: Copy code to EC2 instance
         run: |
-          scp -o StrictHostKeyChecking=no -i $EC2_SSH_PRIVATE_KEY -r ./ $EC2_USERNAME@$EC2_URL:/home/ubuntu/docker_images
+          scp -o StrictHostKeyChecking=no -i private_key.pem -r ./ $EC2_USERNAME@$EC2_URL:/home/ubuntu/docker_images
