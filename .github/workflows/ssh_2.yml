@@ -1,4 +1,4 @@
-name: Deploy Code to EC2
+name: Deploy Light Project to EC2
 
 on:
   push:
@@ -12,20 +12,46 @@ jobs:
       EC2_SSH_PRIVATE_KEY: ${{ secrets.EC2_SSH_PRIVATE_KEY }}
       EC2_URL: ${{ secrets.EC2_URL }}
       EC2_USERNAME: ${{ secrets.EC2_USERNAME }}
+      ENV_FILE: ${{ secrets.ENV_FILE }}
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
+
+      - name: Build the project
+        run: |
+          npm install
+          npm run build
 
       - name: Save SSH private key to a file
         run: echo "$EC2_SSH_PRIVATE_KEY" > private_key.pem && chmod 600 private_key.pem
 
       - name: Verify remote directory exists (and create it if it doesn't)
         run: |
-          ssh -o StrictHostKeyChecking=no -i private_key.pem $EC2_USERNAME@$EC2_URL "mkdir -p /home/ubuntu/docker_images"
+          ssh -o StrictHostKeyChecking=no -i private_key.pem $EC2_USERNAME@$EC2_URL "mkdir -p /home/ubuntu/app_dist"
 
-      - name: Copy code to EC2 instance
+      - name: Copy necessary files to EC2
         run: |
-          # Get the absolute path of the current directory
-          WORKDIR=$(pwd)
-          scp -o StrictHostKeyChecking=no -i private_key.pem -r $WORKDIR/* $EC2_USERNAME@$EC2_URL:/home/ubuntu/docker_images
+          scp -o StrictHostKeyChecking=no -i private_key.pem -r ./dist ./package*.json $EC2_USERNAME@$EC2_URL:/home/ubuntu/app_dist
+
+      - name: Upload the .env file to EC2
+        run: |
+          ssh -o StrictHostKeyChecking=no -i private_key.pem $EC2_USERNAME@$EC2_URL << 'EOF'
+            echo "$ENV_FILE" > /home/ubuntu/app_dist/.env
+          EOF
+
+      - name: Install dependencies and run the project
+        run: |
+          ssh -o StrictHostKeyChecking=no -i private_key.pem $EC2_USERNAME@$EC2_URL << 'EOF'
+            cd /home/ubuntu/app_dist
+
+            # Instalar dependencias de producción
+            npm install --production
+
+            # Ejecutar la aplicación con PM2
+            pm2 start dist/index.js --name "private-api-backend" || pm2 restart private-api-backend
+
+            # Configurar PM2 para reinicio automático
+            pm2 startup
+            pm2 save
+          EOF
