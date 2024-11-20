@@ -17,12 +17,6 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      - name: Setup SSH for EC2
-        uses: omarhosny206/setup-ssh-for-ec2@v1.0.0
-        with:
-          EC2_SSH_PRIVATE_KEY: $EC2_SSH_PRIVATE_KEY
-          EC2_URL: $EC2_URL
-
       - name: Save SSH private key to a file
         run: echo "$EC2_SSH_PRIVATE_KEY" > private_key.pem && chmod 600 private_key.pem
 
@@ -32,4 +26,6 @@ jobs:
 
       - name: Copy code to EC2 instance
         run: |
-          scp -o StrictHostKeyChecking=no -i private_key.pem -r ./ $EC2_USERNAME@$EC2_URL:/home/ubuntu/docker_images
+          # Get the absolute path of the current directory
+          WORKDIR=$(pwd)
+          scp -o StrictHostKeyChecking=no -i private_key.pem -r $WORKDIR/* $EC2_USERNAME@$EC2_URL:/home/ubuntu/docker_images
