@@ -47,7 +47,5 @@ jobs:
       - name: Install dependencies
         run: |
           ssh -o StrictHostKeyChecking=no -i private_key.pem $EC2_USERNAME@$EC2_URL << 'EOF'
-          cd /home/ubuntu/app_dist
-           ls -l
-           npm install --verbose
+           bash -l -c "cd /home/ubuntu/app_dist && npm install --verbose"
           EOF
