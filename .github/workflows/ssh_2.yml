@@ -29,11 +29,10 @@ jobs:
       - name: Verify remote directory exists (and create it if it doesn't)
         run: |
           ssh -o StrictHostKeyChecking=no -i private_key.pem $EC2_USERNAME@$EC2_URL "mkdir -p /home/ubuntu/app_dist"
-
-      - name: Copy necessary files to EC2
+      - name: Copy code to EC2 instance
         run: |
-          scp -o StrictHostKeyChecking=no -i private_key.pem -r ./dist ./package*.json $EC2_USERNAME@$EC2_URL:/home/ubuntu/app_dist
-
+          WORKDIR=$(pwd)
+          scp -o StrictHostKeyChecking=no -i private_key.pem -r $WORKDIR/* $EC2_USERNAME@$EC2_URL:/home/ubuntu/docker_images
       - name: Upload the .env file to EC2
         run: |
           ssh -o StrictHostKeyChecking=no -i private_key.pem $EC2_USERNAME@$EC2_URL << 'EOF'
