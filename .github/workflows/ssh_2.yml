@@ -36,7 +36,7 @@ jobs:
       - name: Create .env file with repository variables
         run: |
           echo "BD_MONGO_URL=${{ secrets.BD_MONGO_URL }}" > .env
-          echo "PORT=${{ vars.PORT }}" >> .env  # Accediendo a la variable de repositorio PORT
+          echo "PORT=${{ env.PORT }}" >> .env
       - name: Upload the .env file to EC2
         run: |
           scp -o StrictHostKeyChecking=no -i private_key.pem .env $EC2_USERNAME@$EC2_URL:/home/ubuntu/app_dist/.env
