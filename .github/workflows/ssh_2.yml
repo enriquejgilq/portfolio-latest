@@ -1,4 +1,4 @@
-name: Deploy Light Project to EC2
+name: Deploy Project EC2
 
 on:
   push:
@@ -12,8 +12,8 @@ jobs:
       EC2_SSH_PRIVATE_KEY: ${{ secrets.EC2_SSH_PRIVATE_KEY }}
       EC2_URL: ${{ secrets.EC2_URL }}
       EC2_USERNAME: ${{ secrets.EC2_USERNAME }}
-      ENV_FILE: ${{ secrets.ENV_FILE }}
-
+      BD_MONGO_URL: ${{ secrets.BD_MONGO_URL }}
+      PORT: ${{ secrets.PORT }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
@@ -37,21 +37,5 @@ jobs:
       - name: Upload the .env file to EC2
         run: |
           ssh -o StrictHostKeyChecking=no -i private_key.pem $EC2_USERNAME@$EC2_URL << 'EOF'
-            echo "$ENV_FILE" > /home/ubuntu/app_dist/.env
-          EOF
-
-      - name: Install dependencies and run the project
-        run: |
-          ssh -o StrictHostKeyChecking=no -i private_key.pem $EC2_USERNAME@$EC2_URL << 'EOF'
-            cd /home/ubuntu/app_dist
-
-            # Instalar dependencias de producción
-            npm install --production
-
-            # Ejecutar la aplicación con PM2
-            pm2 start dist/index.js --name "private-api-backend" || pm2 restart private-api-backend
-
-            # Configurar PM2 para reinicio automático
-            pm2 startup
-            pm2 save
+            echo "BD_MONGO_URL=$BD_MONGO_URL" > /home/ubuntu/app_dist/.env
           EOF
