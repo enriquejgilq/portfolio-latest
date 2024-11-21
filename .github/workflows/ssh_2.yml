@@ -35,6 +35,6 @@ jobs:
           rsync -avz --exclude 'node_modules' -e "ssh -o StrictHostKeyChecking=no -i private_key.pem" ./ $EC2_USERNAME@$EC2_URL:/home/ubuntu/app_dist
       - name: Upload the .env file to EC2
         run: |
-          ssh -o StrictHostKeyChecking=no -i private_key.pem $EC2_USERNAME@$EC2_URL << 'EOF'
+          ssh -o StrictHostKeyChecking=no -i private_key.pem $EC2_USERNAME@$EC2_URL << EOF
             echo "BD_MONGO_URL=${{ secrets.BD_MONGO_URL }}" > /home/ubuntu/app_dist/.env
           EOF
