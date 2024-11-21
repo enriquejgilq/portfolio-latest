@@ -13,7 +13,7 @@ jobs:
       EC2_URL: ${{ secrets.EC2_URL }}
       EC2_USERNAME: ${{ secrets.EC2_USERNAME }}
       BD_MONGO_URL: ${{ secrets.BD_MONGO_URL }}
-      PORT: ${{ secrets.PORT }}
+      PORT: ${{ vars.PORT }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
@@ -33,11 +33,10 @@ jobs:
         run: |
           WORKDIR=$(pwd)
           rsync -avz --exclude 'node_modules' -e "ssh -o StrictHostKeyChecking=no -i private_key.pem" ./ $EC2_USERNAME@$EC2_URL:/home/ubuntu/app_dist
-      - name: Create .env file
+      - name: Create .env file with repository variables
         run: |
           echo "BD_MONGO_URL=${{ secrets.BD_MONGO_URL }}" > .env
-
+          echo "PORT=${{ vars.PORT }}" >> .env  # Accediendo a la variable de repositorio PORT
       - name: Upload the .env file to EC2
         run: |
-          echo "BD_MONGO_URL=${{ secrets.BD_MONGO_URL }}" > .env
           scp -o StrictHostKeyChecking=no -i private_key.pem .env $EC2_USERNAME@$EC2_URL:/home/ubuntu/app_dist/.env
