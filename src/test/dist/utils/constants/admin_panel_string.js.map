@@ -1,0 +1,1 @@
+{"version":3,"file":"admin_panel_string.js","sourceRoot":"","sources":["../../../src/utils/constants/admin_panel_string.ts"],"names":[],"mappings":";;;AAAa,QAAA,gBAAgB,GAAG;IAC9B,QAAQ,EAAE,IAAI;IACd,UAAU,EAAE,MAAM;IAClB,aAAa,EAAE,SAAS;IACxB,UAAU,EAAE,MAAM;IAClB,YAAY,EAAE,QAAQ;IACtB,UAAU,EAAE,MAAM;IAClB,cAAc,EAAE,UAAU;IAC1B,sBAAsB,EAAE,kBAAkB;CAC3C,CAAC"}
