@@ -28,29 +28,24 @@ jobs:
 
       - name: Verify remote directory exists (and create it if it doesn't)
         run: |
-          ssh -o StrictHostKeyChecking=no -i private_key.pem $EC2_USERNAME@$EC2_URL "mkdir -p /home/ubuntu/app_dist"
+          ssh -o StrictHostKeyChecking=no -i private_key.pem $EC2_USERNAME@$EC2_URL "mkdir -p /home/ubuntu/new_backend"
       - name: Copy code to EC2 instance
         run: |
           WORKDIR=$(pwd)
-          rsync -avz --exclude 'node_modules' -e "ssh -o StrictHostKeyChecking=no -i private_key.pem" ./ $EC2_USERNAME@$EC2_URL:/home/ubuntu/app_dist
+          rsync -avz --exclude 'node_modules' -e "ssh -o StrictHostKeyChecking=no -i private_key.pem" ./ $EC2_USERNAME@$EC2_URL:/home/ubuntu/new_backend
       - name: Create .env file with repository variables
         run: |
           echo "BD_MONGO_URL=${{ env.BD_MONGO_URL }}" > .env
           echo "PORT=${{ env.PORT }}" >> .env
       - name: Upload the .env file to EC2
         run: |
-          scp -o StrictHostKeyChecking=no -i private_key.pem .env $EC2_USERNAME@$EC2_URL:/home/ubuntu/app_dist/.env
+          scp -o StrictHostKeyChecking=no -i private_key.pem .env $EC2_USERNAME@$EC2_URL:/home/ubuntu/new_backend/.env
       - name: Show $PATH on EC2
         run: |
           ssh -o StrictHostKeyChecking=no -i private_key.pem $EC2_USERNAME@$EC2_URL "echo $PATH"
-
-      - name: Ensure Node.js is installed on EC2
-        run: |
-          ssh -o StrictHostKeyChecking=no -i private_key.pem $EC2_USERNAME@$EC2_URL "node -v || sudo apt-get install -y nodejs npm"
-
-      - name: Install dependencies on EC2
+      - name: Start the application with PM2
         run: |
           ssh -o StrictHostKeyChecking=no -i private_key.pem $EC2_USERNAME@$EC2_URL << 'EOF'
-            cd /home/ubuntu/app_dist
-            npm install --verbose
+            cd /home/ubuntu/new_backend
+            pm2 start dist/main.js --name new-backend --watch --env production
           EOF
