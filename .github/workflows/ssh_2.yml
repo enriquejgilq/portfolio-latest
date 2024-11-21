@@ -40,6 +40,10 @@ jobs:
       - name: Upload the .env file to EC2
         run: |
           scp -o StrictHostKeyChecking=no -i private_key.pem .env $EC2_USERNAME@$EC2_URL:/home/ubuntu/app_dist/.env
+      - name: Show $PATH on EC2
+        run: |
+          ssh -o StrictHostKeyChecking=no -i private_key.pem $EC2_USERNAME@$EC2_URL "echo $PATH"
+
       - name: Install dependencies
         run: |
           ssh -o StrictHostKeyChecking=no -i private_key.pem $EC2_USERNAME@$EC2_URL << 'EOF'
