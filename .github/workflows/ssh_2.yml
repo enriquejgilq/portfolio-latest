@@ -32,7 +32,7 @@ jobs:
       - name: Copy code to EC2 instance
         run: |
           WORKDIR=$(pwd)
-          scp -o StrictHostKeyChecking=no -i private_key.pem -r $WORKDIR/* $EC2_USERNAME@$EC2_URL:/home/ubuntu/docker_images
+          scp -o StrictHostKeyChecking=no -i private_key.pem -r $WORKDIR/* $EC2_USERNAME@$EC2_URL:/home/ubuntu/app_dist
       - name: Upload the .env file to EC2
         run: |
           ssh -o StrictHostKeyChecking=no -i private_key.pem $EC2_USERNAME@$EC2_URL << 'EOF'
