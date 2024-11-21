@@ -37,6 +37,7 @@ jobs:
         run: |
           echo "BD_MONGO_URL=${{ secrets.BD_MONGO_URL }}" > .env
 
-      - name: Upload .env file to EC2
+      - name: Upload the .env file to EC2
         run: |
+          echo "BD_MONGO_URL=${{ secrets.BD_MONGO_URL }}" > .env
           scp -o StrictHostKeyChecking=no -i private_key.pem .env $EC2_USERNAME@$EC2_URL:/home/ubuntu/app_dist/.env
