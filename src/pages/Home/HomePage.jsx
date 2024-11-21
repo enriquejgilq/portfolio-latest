@@ -47,7 +47,7 @@ export default function Component() {
   };
 
   const handleLucky = () => {
-    console.log("I'm feeling lucky!");
+    console.log("I'm feeling lucky!1");
   };
   const title = ["P", "o", "r", "t", "a", "f", "o", "l", "i", "o"];
   const colors = [
