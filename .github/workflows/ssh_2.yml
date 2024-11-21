@@ -45,8 +45,4 @@ jobs:
           ssh -o StrictHostKeyChecking=no -i private_key.pem $EC2_USERNAME@$EC2_URL "echo $PATH"
       - name: Start the application with PM2
         run: |
-          ssh -o StrictHostKeyChecking=no -i private_key.pem $EC2_USERNAME@$EC2_URL << 'EOF'
-            export PATH=$PATH:/usr/local/bin
-            cd /home/ubuntu/new_backend
-            pm2 start dist/main.js --name new-backend --watch --env production
-          EOF
+          ssh -o StrictHostKeyChecking=no -i private_key.pem $EC2_USERNAME@$EC2_URL "/home/ubuntu/.nvm/versions/node/v20.18.0/bin/pm2 start dist/main.js --name new-backend --watch --env production"
