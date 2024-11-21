@@ -47,6 +47,6 @@ jobs:
       - name: Install dependencies
         run: |
           ssh -o StrictHostKeyChecking=no -i private_key.pem $EC2_USERNAME@$EC2_URL << 'EOF'
-          cd /home/ubuntu/app_dist
-           node -v
+            cd /home/ubuntu/app_dist
+            node -v
           EOF
