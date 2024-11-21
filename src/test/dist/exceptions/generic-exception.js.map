@@ -1,1 +1,0 @@
-{"version":3,"file":"generic-exception.js","sourceRoot":"","sources":["../../src/exceptions/generic-exception.ts"],"names":[],"mappings":";;;AAAA,MAAa,gBAAiB,SAAQ,KAAK;IAIvC,YAAY,OAAe,EAAE,MAAc;QACvC,KAAK,CAAC,OAAO,CAAC,CAAA;QACd,IAAI,CAAC,MAAM,GAAG,MAAM,CAAA;QACpB,IAAI,CAAC,OAAO,GAAG,OAAO,CAAA;IAC1B,CAAC;CACJ;AATD,4CASC"}

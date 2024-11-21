@@ -43,6 +43,9 @@ jobs:
       - name: Show $PATH on EC2
         run: |
           ssh -o StrictHostKeyChecking=no -i private_key.pem $EC2_USERNAME@$EC2_URL "echo $PATH"
+      - name: Show current directory before starting PM2
+        run: |
+          ssh -o StrictHostKeyChecking=no -i private_key.pem $EC2_USERNAME@$EC2_URL "echo 'Current directory: ' && pwd"
       - name: Start the application with PM2
         run: |
           ssh -o StrictHostKeyChecking=no -i private_key.pem $EC2_USERNAME@$EC2_URL "/home/ubuntu/.nvm/versions/node/v20.18.0/bin/pm2 start dist/main.js --name new-backend --watch --env production"
