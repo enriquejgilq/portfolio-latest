@@ -37,5 +37,5 @@ jobs:
         run: |
           ssh -o StrictHostKeyChecking=no -i private_key.pem $EC2_USERNAME@$EC2_URL << 'EOF'
             echo 'holamundo="saludo"' > /home/ubuntu/app_dist/.env
-            echo 'BD_MONGO_URL=$BD_MONGO_URL' >> /home/ubuntu/app_dist/.env
+            echo "BD_MONGO_URL=${{ secrets.BD_MONGO_URL }}" > /home/ubuntu/app_dist/.env
           EOF
