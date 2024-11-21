@@ -45,5 +45,4 @@ jobs:
           ssh -o StrictHostKeyChecking=no -i private_key.pem $EC2_USERNAME@$EC2_URL << 'EOF'
             cd /home/ubuntu/app_dist
             npm install 
-            pm2 start dist/main.js --name "private-api-backend" --watch || pm2 restart private-api-backend
           EOF
