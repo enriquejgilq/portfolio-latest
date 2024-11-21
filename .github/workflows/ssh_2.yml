@@ -44,9 +44,13 @@ jobs:
         run: |
           ssh -o StrictHostKeyChecking=no -i private_key.pem $EC2_USERNAME@$EC2_URL "echo $PATH"
 
-      - name: Install dependencies
+      - name: Ensure Node.js is installed on EC2
+        run: |
+          ssh -o StrictHostKeyChecking=no -i private_key.pem $EC2_USERNAME@$EC2_URL "node -v || sudo apt-get install -y nodejs npm"
+
+      - name: Install dependencies on EC2
         run: |
           ssh -o StrictHostKeyChecking=no -i private_key.pem $EC2_USERNAME@$EC2_URL << 'EOF'
             cd /home/ubuntu/app_dist
-            node -v
+            npm install --verbose
           EOF
