@@ -29,23 +29,40 @@ jobs:
       - name: Verify remote directory exists (and create it if it doesn't)
         run: |
           ssh -o StrictHostKeyChecking=no -i private_key.pem $EC2_USERNAME@$EC2_URL "mkdir -p /home/ubuntu/new_backend"
+
       - name: Copy code to EC2 instance
         run: |
           WORKDIR=$(pwd)
           rsync -avz --exclude 'node_modules' -e "ssh -o StrictHostKeyChecking=no -i private_key.pem" ./ $EC2_USERNAME@$EC2_URL:/home/ubuntu/new_backend
+
       - name: Create .env file with repository variables
         run: |
           echo "BD_MONGO_URL=${{ env.BD_MONGO_URL }}" > .env
           echo "PORT=${{ env.PORT }}" >> .env
+
       - name: Upload the .env file to EC2
         run: |
           scp -o StrictHostKeyChecking=no -i private_key.pem .env $EC2_USERNAME@$EC2_URL:/home/ubuntu/new_backend/.env
+
+      - name: Move to backend directory and copy node_modules
+        run: |
+          ssh -o StrictHostKeyChecking=no -i private_key.pem $EC2_USERNAME@$EC2_URL <<EOF
+          cd GitHub/Private-Api-backend/
+          cp -r node_modules /home/ubuntu/new_backend/
+          EOF
+
       - name: Show $PATH on EC2
         run: |
           ssh -o StrictHostKeyChecking=no -i private_key.pem $EC2_USERNAME@$EC2_URL "echo $PATH"
+
       - name: Show current directory before starting PM2
         run: |
           ssh -o StrictHostKeyChecking=no -i private_key.pem $EC2_USERNAME@$EC2_URL "echo 'Current directory: ' && pwd"
+
       - name: Start the application with PM2
         run: |
-          ssh -o StrictHostKeyChecking=no -i private_key.pem $EC2_USERNAME@$EC2_URL "/home/ubuntu/.nvm/versions/node/v20.18.0/bin/pm2 start dist/main.js --name new-backend --watch --env production"
+          ssh -o StrictHostKeyChecking=no -i private_key.pem $EC2_USERNAME@$EC2_URL <<EOF
+          set -e
+          cd /home/ubuntu/new_backend
+          /home/ubuntu/.nvm/versions/node/v20.18.0/bin/pm2 start dist/main.js --name new-backend --watch
+          EOF
