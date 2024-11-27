@@ -5,6 +5,7 @@ import { SearchPage } from "./pages/SearchPage/SearchPage.jsx";
 import { PageDetails } from "./pages/PageDetails/PageDetails.jsx";
 
 function App() {
+  //1
   return (
     <Router>
       <Routes>
