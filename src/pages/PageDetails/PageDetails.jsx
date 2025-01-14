@@ -35,7 +35,6 @@ export const PageDetails = () => {
       setData(data.result);
       setLoading(false);
     } catch (error) {
-      console.error("Fetch error:", error);
       setLoading(false);
     }
   }

@@ -1,5 +1,4 @@
-import React, { useState, useEffect } from "react";
-
+import { useState, useEffect } from "react";
 import { Profile } from "../../components/Profile/Profile";
 import { useNavigate } from "react-router-dom";
 import Autocomplete from "@mui/material/Autocomplete";
@@ -12,6 +11,7 @@ import ListItem from "@mui/material/ListItem";
 import ListItemText from "@mui/material/ListItemText";
 import Divider from "@mui/material/Divider";
 import { Typography } from "@mui/material";
+import Button from '@mui/material/Button';
 
 import { CiMenuKebab } from "react-icons/ci";
 export default function Component() {
@@ -71,6 +71,7 @@ export default function Component() {
   }, []);
   return (
     <div className="min-h-screen flex flex-col">
+
       <header className="flex justify-end items-center p-2 md:p-4">
         <nav className="flex items-center space-x-2 md:space-x-4">
           <Profile img="https://imgcdn.stablediffusionweb.com/2024/2/24/31aad3d9-a853-4296-88d7-58b3104a0527.jpg" />
@@ -93,6 +94,7 @@ export default function Component() {
           <div className="relative">
             <div className="w-full py-2 md:py-3 px-3 md:px-5 rounded-full border border-gray-200 focus-within:border-gray-300 shadow-lg">
               <Autocomplete
+                clearIcon={null}
                 freeSolo
                 options={options}
                 onChange={handleSelection}
@@ -127,30 +129,44 @@ export default function Component() {
               />
             </div>
             <div className="absolute right-0 top-0 h-full flex items-center pr-2 md:pr-3 space-x-2 md:space-x-3">
-              <button
+              <Button
+                disableRipple
+                onClick={handleSearch}
+                sx={{
+                  '&:hover': {
+                    backgroundColor: 'transparent',
+                  },
+                  '&:active': {
+                    backgroundColor: 'transparent',
+                    boxShadow: 'none',
+                  },
+                  '&:focus': {
+                    outline: 'none',
+                  },
+                }}
                 type="submit"
                 className="text-blue-500 hover:text-blue-600"
               >
                 <SearchIcon className="w-4 h-4 md:w-5 md:h-5" />
-              </button>
+              </Button>
             </div>
           </div>
+
           <div className="block md:hidden mt-2">
             <div className="text-left ml-2 mt-12 flex flex-row items-center">
               <Typography sx={{ fontWeight: "bold" }}>
                 Tendencias de búsquedas
               </Typography>
               <CiMenuKebab className="ml-auto" />
+
             </div>
 
             <List>
               {tendencies.map((item, index) => (
                 <div key={index}>
                   <ListItem>
-                    <div className="flex items-center gap-2">
-                      <TrendingUpIcon />
-                      <ListItemText primary={item.title} />
-                    </div>
+                    <TrendingUpIcon sx={{ color: 'black', marginRight: '8px' }} />
+                    <ListItemText sx={{ color: 'black'  }} primary={item.title} />
                   </ListItem>
                   <Divider component="li" />
                 </div>

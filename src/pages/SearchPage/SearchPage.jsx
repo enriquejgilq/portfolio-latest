@@ -1,12 +1,10 @@
-import React, { useState, useEffect } from "react";
-import { Search, Mic, Camera } from "lucide-react";
+import { useState, useEffect } from "react";
 import { Profile } from "../../components/Profile/Profile";
 import { useNavigate, useLocation } from "react-router-dom";
-import Tab from "@mui/material/Tab";
-import TabContext from "@mui/lab/TabContext";
-import TabList from "@mui/lab/TabList";
-import Divider from "@mui/material/Divider";
-import Autocomplete from "@mui/material/Autocomplete";
+import InputAdornment from '@mui/material/InputAdornment';
+import TextField from '@mui/material/TextField';
+import SearchIcon from '@mui/icons-material/Search';
+
 import AllResult from "../../components/AllResults/AllResult";
 import Paginator from "../../components/Paginator/Paginator";
 import PreviewResults from "../../components/PreviewResults/PreviewResults";
@@ -112,15 +110,16 @@ export const SearchPage = () => {
   }, []);
 
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="min-h-screen flex flex-col mt-[1%]">
+
       <Logo open={false} />
-      <header className="border-b flex-row">
-        <div className="flex mx-[2%]">
-          <div
-            className="flex items-center max-w-full cursor-pointer"
-            onClick={onHome}
-          >
-            <h1 className="text-2xl font-bold mr-8">
+      <header className="border-b flex flex-col sm:flex-row items-center px-4 py-2 justify-center sm:justify-start">
+        <div
+          className="flex items-center cursor-pointer w-full sm:w-auto"
+          onClick={onHome}
+        >
+          <div className="flex w-full justify-center sm:justify-start">
+            <h1 className="text-2xl font-bold mr-4">
               {title.map((item, index) => (
                 <span key={index} className={colors[index % colors.length]}>
                   {item}
@@ -129,76 +128,55 @@ export const SearchPage = () => {
             </h1>
           </div>
 
-          <div className="flex items-center p-4 w-4/5">
-            <form className="flex-grow max-w-2xl">
-              <div className="relative">
-                <input
-                  type="text"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full py-2 px-4 rounded-full border border-gray-200 focus:outline-none focus:border-gray-300 shadow-sm"
-                />
-                <div className="absolute right-0 top-0 h-full flex items-center pr-3 space-x-3">
-                  <button
-                    type="button"
-                    className="text-gray-400 hover:text-gray-600"
-                  >
-                    <Mic className="w-5 h-5" />
-                  </button>
-                  <button
-                    type="button"
-                    className="text-gray-400 hover:text-gray-600"
-                  >
-                    <Camera className="w-5 h-5" />
-                  </button>
-                  <button
-                    type="button"
-                    onClick={handleSearch}
-                    className="text-blue-500 hover:text-blue-600"
-                  >
-                    <Search className="w-5 h-5" />
-                  </button>
-                </div>
-              </div>
-            </form>
-          </div>
-
-          <div className="flex items-center w-1/ ml-auto  mr-8 ">
-            <Profile img="https://imgcdn.stablediffusionweb.com/2024/2/24/31aad3d9-a853-4296-88d7-58b3104a0527.jpg" />
-          </div>
         </div>
 
-        <div className="flex px-4 pb- mx-[10%]">
-          <TabContext value={value}>
-            <TabList onChange={handleChange}>
-              <Tab label="Todo" value="1" />
-              <Tab label="Projectos" value="2" />
-              <Tab label="Skills" value="3" />
-              <Tab label="Experiencia" value="4" />
-              <Tab label="Más" value="5" />
-            </TabList>
-          </TabContext>
+        <div className="flex w-full sm:justify-start justify-center">
+          <form className="w-full sm:w-auto max-w-md lg:max-w-2xl sm:ml-0 mx-auto">
+            <div>
+              <div className="flex w-[350px] sm:w-[500px] mt-[5%] sm:mt-0">
+
+                <TextField
+                  fullWidth
+                  sx={{
+                    "& .MuiOutlinedInput-root": {
+                      borderRadius: "30px",
+                    },
+                  }}
+                  InputProps={{
+                    startAdornment: (
+                      <InputAdornment position="start">
+                        <SearchIcon />
+                      </InputAdornment>
+                    ),
+                  }}
+                />
+              </div>
+            </div>
+          </form>
+        </div>
+
+
+        <div className="absolute top-[2%] right-[5%] sm:relative sm:top-0 sm:right-0 ml-[70%] sm:ml-0">
+          <Profile img="https://imgcdn.stablediffusionweb.com/2024/2/24/31aad3d9-a853-4296-88d7-58b3104a0527.jpg" />
         </div>
       </header>
 
-      <div className="flex flex-row max-w-full mx-[10%] h-full ">
+
+
+      <div className="flex flex-col sm:flex-row items-start mx-4 sm:mx-[10%] mt-4">
         <div
-          className={
-            value === "1" && allResultsData.length > 0 ? "w-3/4" : "w-full"
-          }
+          className={`${value === "1" && allResultsData.length > 0 ? "sm:w-3/4" : "w-full"
+            }`}
         >
           {renderTabContent()}
         </div>
         {value === "1" && allResultsData.length > 0 && (
-          <>
-            <Divider orientation="vertical" flexItem sx={{ marginTop: "2%" }} />
-            <div className=" p-4 w-3/12 bg-white mx-auto">
-              <PreviewResults
-                data={allResultsDataImages}
-                handleOnTab={handleOnTab}
-              />
-            </div>
-          </>
+          <div className="hidden sm:flex flex-col sm:w-1/4 p-4 bg-white shadow">
+            <PreviewResults
+              data={allResultsDataImages}
+              handleOnTab={handleOnTab}
+            />
+          </div>
         )}
       </div>
     </div>
