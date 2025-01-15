@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import   { useState } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 
 export default function Paginator({ phrase = "", totalPages = 0 }) {
@@ -30,7 +30,7 @@ export default function Paginator({ phrase = "", totalPages = 0 }) {
         <button
           onClick={() => handlePageChange(Math.max(1, currentPage - 1))}
           disabled={currentPage === 1}
-          className="flex items-center gap-1 text-[#4285F4] hover:underline disabled:text-gray-400 disabled:no-underline"
+          className="flex items-center gap-1 text-[#4285F4] hover:underline disabled:text-gray-400 disabled:no-underline bg-transparent"
         >
           <ChevronLeft className="h-4 w-4" />
           Anterior
@@ -40,7 +40,7 @@ export default function Paginator({ phrase = "", totalPages = 0 }) {
             <button
               key={i + 1}
               onClick={() => handlePageChange(i + 1)}
-              className={`px-1 hover:underline ${
+              className={`px-1 hover:underline bg-transparent ${
                 currentPage === i + 1
                   ? "text-black pointer-events-none"
                   : "text-[#4285F4]"
@@ -56,7 +56,7 @@ export default function Paginator({ phrase = "", totalPages = 0 }) {
             handlePageChange(Math.min(totalPages, currentPage + 1))
           }
           disabled={currentPage === totalPages}
-          className="flex items-center gap-1 text-[#4285F4] hover:underline disabled:text-gray-400 disabled:no-underline"
+          className="flex items-center gap-1 text-[#4285F4] hover:underline disabled:text-gray-400 disabled:no-underline bg-transparent"
         >
           Siguiente
           <ChevronRight className="h-4 w-4" />

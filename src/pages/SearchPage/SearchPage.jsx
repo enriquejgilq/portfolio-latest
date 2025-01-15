@@ -10,7 +10,9 @@ import Paginator from "../../components/Paginator/Paginator";
 import PreviewResults from "../../components/PreviewResults/PreviewResults";
 import Allprojects from "../../components/AllProjects/Allprojects";
 import Logo from "../../components/Logo";
-
+import Tabs from '@mui/material/Tabs';
+import Tab from '@mui/material/Tab';
+ 
 export const SearchPage = () => {
   const navigate = useNavigate();
   const location = useLocation();
@@ -61,7 +63,7 @@ export const SearchPage = () => {
       case "2":
         return <Allprojects />;
       case "3":
-        return <div> 2</div>;
+        return <div> 222222222222222222</div>;
       case "4":
         return <div> 3</div>;
       case "5":
@@ -127,9 +129,7 @@ export const SearchPage = () => {
               ))}
             </h1>
           </div>
-
         </div>
-
         <div className="flex w-full sm:justify-start justify-center">
           <form className="w-full sm:w-auto max-w-md lg:max-w-2xl sm:ml-0 mx-auto">
             <div>
@@ -154,15 +154,26 @@ export const SearchPage = () => {
             </div>
           </form>
         </div>
-
-
         <div className="absolute top-[2%] right-[5%] sm:relative sm:top-0 sm:right-0 ml-[70%] sm:ml-0">
           <Profile img="https://imgcdn.stablediffusionweb.com/2024/2/24/31aad3d9-a853-4296-88d7-58b3104a0527.jpg" />
         </div>
       </header>
 
-
-
+      <div className="px-4 mx-auto w-full md:w-[90%]">
+        <Tabs
+          value={value}
+          onChange={handleChange}
+          variant="scrollable"
+          scrollButtons="auto"
+          aria-label="scrollable auto tabs example"
+        >
+          <Tab label="Todo" value="1" className="py-1 px-3 text-base md:text-lg md:py-2 md:px-4 rounded-md border border-gray-300 hover:bg-gray-100 cursor-pointer" />
+          <Tab label="Proyectos" value="2" className="py-1 px-3 text-base md:text-lg md:py-2 md:px-4 rounded-md border border-gray-300 hover:bg-gray-100 cursor-pointer" />
+          <Tab label="Skills" value="3" className="py-1 px-3 text-base md:text-lg md:py-2 md:px-4 rounded-md border border-gray-300 hover:bg-gray-100 cursor-pointer" />
+          <Tab label="Experiencia" value="4" className="py-1 px-3 text-base md:text-lg md:py-2 md:px-4 rounded-md border border-gray-300 hover:bg-gray-100 cursor-pointer" />
+          <Tab label="Más" value="5" className="py-1 px-3 text-base md:text-lg md:py-2 md:px-4 rounded-md border border-gray-300 hover:bg-gray-100 cursor-pointer" />
+        </Tabs>
+      </div>
       <div className="flex flex-col sm:flex-row items-start mx-4 sm:mx-[10%] mt-4">
         <div
           className={`${value === "1" && allResultsData.length > 0 ? "sm:w-3/4" : "w-full"

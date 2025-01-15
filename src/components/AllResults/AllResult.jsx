@@ -1,11 +1,10 @@
 import React from "react";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 
 const AllResult = ({ data = [] }) => {
   const navigate = useNavigate();
 
   const onPage = (id) => {
-    console.log("<<<<<<<<<", id);
     navigate(`/details?id=${id}`);
   };
   return (
@@ -25,7 +24,7 @@ const AllResult = ({ data = [] }) => {
           <div className="text-sm text-green-700">
             https://yourname.com/portfolio
           </div>
-          <p className="text-sm mt-1">{item.description}</p>
+          <p className="text-sm mt-1 text-black ">{item.description}</p>
         </div>
       ))}
     </div>

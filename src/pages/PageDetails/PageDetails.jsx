@@ -1,9 +1,8 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import Carousel from "react-multi-carousel";
 import "react-multi-carousel/lib/styles.css";
 import { useNavigate, useLocation } from "react-router-dom";
-
-import { Button, Card, Checkbox } from "@mui/material";
+import { Card } from "@mui/material";
 import Chip from "@mui/material/Chip";
 import LaptopChromebookIcon from "@mui/icons-material/LaptopChromebook";
 import ArrowBackSharpIcon from "@mui/icons-material/ArrowBackSharp";
@@ -35,6 +34,7 @@ export const PageDetails = () => {
       setData(data.result);
       setLoading(false);
     } catch (error) {
+      console.error("Error fetching data: ", error);
       setLoading(false);
     }
   }
@@ -49,10 +49,10 @@ export const PageDetails = () => {
       <div className="min-h-screen bg-background">
         <header className="border-b">
           <nav className="container mx-auto flex items-center justify-between p-4">
-            <div className="flex items-center gap-2">
-              <ArrowBackSharpIcon className="cursor-pointer" onClick={goBack} />
-              <LaptopChromebookIcon />
-              <span className="text-lg font-medium">Detalles del proyecto</span>
+            <div className="flex items-center w-[100%] gap-2">
+              <ArrowBackSharpIcon className="cursor-pointer text-black" onClick={goBack} />
+              <LaptopChromebookIcon className="text-black" />
+              <span className="text-lg font-medium text-black">Detalles del proyecto</span>
             </div>
             <div className="hidden md:flex items-center gap-6">
               <a
@@ -66,7 +66,7 @@ export const PageDetails = () => {
         </header>
 
         <main className="container mx-auto px-4 py-12">
-          <div className="flex flex-col items-center text-center gap-8 max-w-3xl mx-auto">
+          <div className="flex flex-col items-center text-center gap-8 max-w-3xl mx-auto text-black">
             <h1 className="text-4xl md:text-5xl font-bold tracking-tight">
               {data?.name}
             </h1>
@@ -74,7 +74,7 @@ export const PageDetails = () => {
             <div className="flex items-start gap-9">
               <label
                 htmlFor="terms"
-                className="text-sm text-muted-foreground text-left"
+                className="text-sm text-muted-foreground text-left "
               >
                 {data?.description}
               </label>
@@ -144,7 +144,7 @@ export const PageDetails = () => {
                 <div style={{ gap: "50px", margin: "1%" }} key={index}>
                   <Card elevation={3}>
                     <img
-                      src={item ? img1 : ""}
+                      src={item && ""}
                       alt={item ? item : ""}
                       width={400}
                       height={200}
