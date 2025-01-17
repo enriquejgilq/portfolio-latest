@@ -90,7 +90,7 @@ export const PageDetails = () => {
               additionalTransfrom={0}
               arrows
               autoPlay
-              autoPlaySpeed={10010}
+              autoPlaySpeed={1500}
               centerMode={false}
               className=""
               containerClass="container-with-dots"

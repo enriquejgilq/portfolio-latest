@@ -1,18 +1,19 @@
 import { useState, useEffect } from "react";
-import { Profile } from "../../components/Profile/Profile";
 import { useNavigate, useLocation } from "react-router-dom";
 import InputAdornment from '@mui/material/InputAdornment';
 import TextField from '@mui/material/TextField';
 import SearchIcon from '@mui/icons-material/Search';
-
+import Tabs from '@mui/material/Tabs';
+import Tab from '@mui/material/Tab';
 import AllResult from "../../components/AllResults/AllResult";
 import Paginator from "../../components/Paginator/Paginator";
 import PreviewResults from "../../components/PreviewResults/PreviewResults";
 import Allprojects from "../../components/AllProjects/Allprojects";
 import Logo from "../../components/Logo";
-import Tabs from '@mui/material/Tabs';
-import Tab from '@mui/material/Tab';
- 
+import { Profile } from "../../components/Profile/Profile";
+import NotFoundResults from "./NotFoundResults";
+import img from '../../assets/Egv3.png'
+
 export const SearchPage = () => {
   const navigate = useNavigate();
   const location = useLocation();
@@ -23,21 +24,23 @@ export const SearchPage = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [allResultsData, setAllResultsData] = useState([]);
   const [allResultsDataImages, setAllResultsDataImages] = useState([]);
+  const [suggestion, setSuggestion] = useState([]);
   const [allResultsPages, setAllResultsPages] = useState(0);
   const [value, setValue] = useState("1");
+  const [isLoading, setIsLoading] = useState(false);
+
   const host = import.meta.env.VITE_HOST;
   const port = import.meta.env.VITE_PORT;
 
   const handleSearch = () => {
     if (searchQuery === "" || searchQuery === undefined || searchQuery === null)
       return;
-
     fetchSearchPortfolio(searchQuery, 1, 10);
     const newUrl = new URLSearchParams(location.search);
     newUrl.set("query", searchQuery);
-
     navigate(`?${newUrl.toString()}`, { replace: true });
   };
+
   const onHome = () => {
     navigate(`/`);
   };
@@ -46,14 +49,21 @@ export const SearchPage = () => {
     setValue(newValue);
   };
 
+  const handleChangetext = (event) => {
+    console.log(event.target.value, searchQuery);
+    setSearchQuery(event.target.value);
+  };
+
   const handleOnTab = () => {
     setValue("2");
   };
+
+
   const renderTabContent = () => {
     switch (value) {
       case "1":
         return allResultsData.length === 0 ? (
-          <p> Sin resultados</p>
+          <NotFoundResults fetchSearchPortfolio={fetchSearchPortfolio} suggestionSearch={suggestion} />
         ) : (
           <>
             <AllResult data={allResultsData} />
@@ -80,7 +90,9 @@ export const SearchPage = () => {
     "text-yellow-500",
     "text-green-500",
   ];
+
   async function fetchSearchPortfolio(query, page = 1, limit = 10) {
+    setIsLoading(true);
     try {
       const endpoint = "searchPortfolio";
 
@@ -93,49 +105,61 @@ export const SearchPage = () => {
       if (!response.ok) {
         throw new Error("Error al realizar la búsqueda");
       }
-
       const data = await response.json();
-      setAllResultsData(data.results);
-      const onlyImages = data.results.flatMap((item) => item.images);
+      const onlyImages = data?.results?.flatMap((item) => item.images);
+      setIsLoading(false);
+      setAllResultsData(data.results ? data.results : []);
+      setSuggestion(data.suggestions ? data.suggestions : []);
       setAllResultsDataImages(onlyImages);
-
       setAllResultsPages(data?.totalPages);
+
     } catch (error) {
       console.error("Error en la búsqueda:", error);
+      setIsLoading(false);
       return null;
     }
   }
+
   useEffect(() => {
     if (!searchTerm) return;
     fetchSearchPortfolio(searchTerm, 1, 10);
     setSearchQuery(searchTerm);
+
   }, []);
 
+
+  useEffect(() => {
+    if (!searchTerm) return;
+    setSearchQuery(searchTerm);
+  }, [searchTerm]);
+  
   return (
     <div className="min-h-screen flex flex-col mt-[1%]">
 
-      <Logo open={false} />
+      <Logo open={isLoading} />
       <header className="border-b flex flex-col sm:flex-row items-center px-4 py-2 justify-center sm:justify-start">
         <div
           className="flex items-center cursor-pointer w-full sm:w-auto"
           onClick={onHome}
         >
           <div className="flex w-full justify-center sm:justify-start">
-            <h1 className="text-2xl font-bold mr-4">
+            <h1 className="text-3xl font-extrabold mr-4 tracking-tight drop-shadow-md">
               {title.map((item, index) => (
-                <span key={index} className={colors[index % colors.length]}>
+                <span key={index} className={`${colors[index % colors.length]} drop-shadow-lg`}>
                   {item}
                 </span>
               ))}
             </h1>
+
           </div>
         </div>
         <div className="flex w-full sm:justify-start justify-center">
           <form className="w-full sm:w-auto max-w-md lg:max-w-2xl sm:ml-0 mx-auto">
             <div>
               <div className="flex w-[350px] sm:w-[500px] mt-[5%] sm:mt-0">
-
                 <TextField
+                  value={searchQuery}
+                  onChange={handleChangetext}
                   fullWidth
                   sx={{
                     "& .MuiOutlinedInput-root": {
@@ -145,7 +169,7 @@ export const SearchPage = () => {
                   InputProps={{
                     startAdornment: (
                       <InputAdornment position="start">
-                        <SearchIcon />
+                        <SearchIcon onClick={handleSearch} />
                       </InputAdornment>
                     ),
                   }}
@@ -155,7 +179,7 @@ export const SearchPage = () => {
           </form>
         </div>
         <div className="absolute top-[2%] right-[5%] sm:relative sm:top-0 sm:right-0 ml-[70%] sm:ml-0">
-          <Profile img="https://imgcdn.stablediffusionweb.com/2024/2/24/31aad3d9-a853-4296-88d7-58b3104a0527.jpg" />
+          <Profile imgLogo={img}  />
         </div>
       </header>
 
