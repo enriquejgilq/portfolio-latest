@@ -8,7 +8,7 @@ function NotFoundResults({ suggestionSearch = [], fetchSearchPortfolio }) {
 
     const queryParams = new URLSearchParams(location.search);
     const searchTerm = queryParams.get("query");
-    
+
     const navigate = useNavigate();
     const suggestions = [
         "Asegúrate de que todas las palabras estén escritas correctamente.",
@@ -25,11 +25,22 @@ function NotFoundResults({ suggestionSearch = [], fetchSearchPortfolio }) {
     return (
         <div className="flex flex-col justify-start items-start">
             {suggestionSearch.length > 0 && (
-                <div className="flex flex-row">
-                    <Typography className="text-red-500">Quizás quisiste decir:</Typography>
+                <div className="flex flex-col md:flex-row">
                     <Typography
-                        sx={{ fontWeight: 'bold' }}
-                        className="text-blue-700 font-bold italic ml-2 cursor-pointer"
+                        sx={{ fontSize: { xs: '12px', md: '16px' }, textAlign: 'left', color: 'red' }} >
+                        Quizás quisiste decir:
+                    </Typography>
+                    <Typography
+                        sx={{
+                            fontSize: { xs: '12px', md: '16px' },
+                            fontWeight: 'bold',
+                            fontStyle: 'italic',
+                            textAlign: 'left',
+                            color: 'blue',
+                            marginBottom: { xs: '4px', md: '0' },
+                            marginTop: { xs: '4px', md: '0' },
+                            marginLeft: { md: '8px' }
+                        }}
                         onClick={() => handleSuggestionClick(suggestionSearch[0]?.description)}
                     >
                         {suggestionSearch[0]?.description}
@@ -38,18 +49,18 @@ function NotFoundResults({ suggestionSearch = [], fetchSearchPortfolio }) {
             )}
 
             <div style={{ textAlign: 'start' }} className="text-black">
-                <Typography className="text-black">
+                <Typography sx={{ fontSize: { xs: '12px', md: '16px' }}} className="text-black">
                     No se encontró ningún resultado que contenga todos los términos de búsqueda que ingresaste.
                 </Typography>
             </div>
-            <Typography style={{ fontWeight: 'bold' }} className="text-black">
+            <Typography sx={{ fontWeight: 'bold',fontSize: { xs: '12px', md: '16px' }}}   className="text-black mb-2">
                 ({searchTerm})
             </Typography>
-            <Typography className="text-black">Sugerencias:</Typography>
-            <ul className="list-none text-left pl-0 mt-4 ">
+            <Typography sx={{ fontSize: { xs: '12px', md: '16px' }}}  className="text-black mt-4">Sugerencias:</Typography>
+            <ul className="list-none text-left pl-0 mt-2 ">
                 {suggestions.map((suggestion, index) => (
                     <li key={index} className="flex items-center text-black text-sm m-0 p-0 ">
-                        <Typography sx={{ fontSize: '14px' }} className="text-black"> ● {suggestion}</Typography>
+                        <Typography sx={{ fontSize: { xs: '12px', md: '16px' }}} className="text-black"> ● {suggestion}</Typography>
                     </li>
                 ))}
             </ul>

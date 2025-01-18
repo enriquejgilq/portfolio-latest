@@ -42,8 +42,6 @@ export const Profile = ({ imgLogo="" }) => {
   return (
     <>
       <div className="flex flex-row items-center space-x-2 cursor-pointer">
-        <button className="flex items-center justify-center p-0 w-8 h-8 bg-gray-100 rounded-full">
-        </button>
         <img
           src={imgLogo}
           alt="Profile"

@@ -3,12 +3,13 @@ import Card from "@mui/material/Card";
 import WorkHistoryTwoToneIcon from "@mui/icons-material/WorkHistoryTwoTone";
 import { Typography } from "@mui/material";
 function PreviewResults({ data = [], handleOnTab }) {
+
   const onFuntion = () => {
     handleOnTab();
   };
-  return (
+   return (
     <Card sx={{ margin: "2%" }}>
-      <div className="flex flex-row  h-[100%]">
+      <div className="flex flex-row h-[100%]">
         <div className="flex items-center justify-center  w-1/2">
           <img
             src={

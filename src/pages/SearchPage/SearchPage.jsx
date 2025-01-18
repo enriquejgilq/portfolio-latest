@@ -5,10 +5,16 @@ import TextField from '@mui/material/TextField';
 import SearchIcon from '@mui/icons-material/Search';
 import Tabs from '@mui/material/Tabs';
 import Tab from '@mui/material/Tab';
+import Divider from '@mui/material/Divider';
+import { useLocalStorageState } from '@toolpad/core/useLocalStorageState';
+
 import AllResult from "../../components/AllResults/AllResult";
 import Paginator from "../../components/Paginator/Paginator";
 import PreviewResults from "../../components/PreviewResults/PreviewResults";
 import Allprojects from "../../components/AllProjects/Allprojects";
+import Projects from "../../components/Projects";
+import Experience from "../../components/Experience"; 
+
 import Logo from "../../components/Logo";
 import { Profile } from "../../components/Profile/Profile";
 import NotFoundResults from "./NotFoundResults";
@@ -26,8 +32,8 @@ export const SearchPage = () => {
   const [allResultsDataImages, setAllResultsDataImages] = useState([]);
   const [suggestion, setSuggestion] = useState([]);
   const [allResultsPages, setAllResultsPages] = useState(0);
-  const [value, setValue] = useState("1");
   const [isLoading, setIsLoading] = useState(false);
+  const [page, setPage] = useLocalStorageState('page', '1');
 
   const host = import.meta.env.VITE_HOST;
   const port = import.meta.env.VITE_PORT;
@@ -46,21 +52,19 @@ export const SearchPage = () => {
   };
 
   const handleChange = (event, newValue) => {
-    setValue(newValue);
+    setPage(newValue)
   };
 
   const handleChangetext = (event) => {
-    console.log(event.target.value, searchQuery);
     setSearchQuery(event.target.value);
   };
 
   const handleOnTab = () => {
-    setValue("2");
+    setPage("2");
   };
 
-
   const renderTabContent = () => {
-    switch (value) {
+    switch (page) {
       case "1":
         return allResultsData.length === 0 ? (
           <NotFoundResults fetchSearchPortfolio={fetchSearchPortfolio} suggestionSearch={suggestion} />
@@ -71,25 +75,38 @@ export const SearchPage = () => {
           </>
         );
       case "2":
-        return <Allprojects />;
+        return <Allprojects data={allResultsData} />;
       case "3":
-        return <div> 222222222222222222</div>;
+        return <Projects  />;
       case "4":
-        return <div> 3</div>;
-      case "5":
-        return <div> 4</div>;
+        return <Experience/>;
       default:
         return null;
     }
   };
 
   const title = ["P", "o", "r", "t", "a", "f", "o", "l", "i", "o"];
+
   const colors = [
     "text-blue-500",
     "text-red-500",
     "text-yellow-500",
     "text-green-500",
   ];
+
+  const tabs =[{
+    label: "Resultados",
+    value: "1"
+  },{
+    label: "Proyectos",
+    value: "2"
+  },{
+    label: "Todos los proyectos",
+    value: "3"
+  },{
+    label: "Experiencia",
+    value: "4"
+  } ]
 
   async function fetchSearchPortfolio(query, page = 1, limit = 10) {
     setIsLoading(true);
@@ -124,15 +141,13 @@ export const SearchPage = () => {
     if (!searchTerm) return;
     fetchSearchPortfolio(searchTerm, 1, 10);
     setSearchQuery(searchTerm);
-
   }, []);
-
 
   useEffect(() => {
     if (!searchTerm) return;
     setSearchQuery(searchTerm);
   }, [searchTerm]);
-  
+
   return (
     <div className="min-h-screen flex flex-col mt-[1%]">
 
@@ -179,39 +194,51 @@ export const SearchPage = () => {
           </form>
         </div>
         <div className="absolute top-[2%] right-[5%] sm:relative sm:top-0 sm:right-0 ml-[70%] sm:ml-0">
-          <Profile imgLogo={img}  />
+          <Profile imgLogo={img} />
         </div>
       </header>
 
       <div className="px-4 mx-auto w-full md:w-[90%]">
         <Tabs
-          value={value}
+          value={page}
           onChange={handleChange}
           variant="scrollable"
           scrollButtons="auto"
           aria-label="scrollable auto tabs example"
         >
-          <Tab label="Todo" value="1" className="py-1 px-3 text-base md:text-lg md:py-2 md:px-4 rounded-md border border-gray-300 hover:bg-gray-100 cursor-pointer" />
-          <Tab label="Proyectos" value="2" className="py-1 px-3 text-base md:text-lg md:py-2 md:px-4 rounded-md border border-gray-300 hover:bg-gray-100 cursor-pointer" />
-          <Tab label="Skills" value="3" className="py-1 px-3 text-base md:text-lg md:py-2 md:px-4 rounded-md border border-gray-300 hover:bg-gray-100 cursor-pointer" />
-          <Tab label="Experiencia" value="4" className="py-1 px-3 text-base md:text-lg md:py-2 md:px-4 rounded-md border border-gray-300 hover:bg-gray-100 cursor-pointer" />
-          <Tab label="Más" value="5" className="py-1 px-3 text-base md:text-lg md:py-2 md:px-4 rounded-md border border-gray-300 hover:bg-gray-100 cursor-pointer" />
+          {
+            tabs.map((item, index) => (
+              <Tab sx={{ textTransform: 'none'   }} label={item.label} value={item.value} key={index} className="py-1 px-3 text-base md:text-lg md:py-2 md:px-4 rounded-md border border-gray-300 hover:bg-gray-100 cursor-pointer focus:outline-none focus:ring-0" />
+            ))
+          }
         </Tabs>
       </div>
       <div className="flex flex-col sm:flex-row items-start mx-4 sm:mx-[10%] mt-4">
         <div
-          className={`${value === "1" && allResultsData.length > 0 ? "sm:w-3/4" : "w-full"
+          className={`${page === "1" && allResultsData.length > 0 ? "sm:w-3/4" : "w-full"
             }`}
         >
           {renderTabContent()}
         </div>
-        {value === "1" && allResultsData.length > 0 && (
-          <div className="hidden sm:flex flex-col sm:w-1/4 p-4 bg-white shadow">
-            <PreviewResults
-              data={allResultsDataImages}
-              handleOnTab={handleOnTab}
+        {page === "1" && allResultsData.length > 0 && (
+          <>
+            <Divider
+              orientation="vertical"
+              flexItem
+              sx={{
+                backgroundColor: 'black',
+                height: '500px',
+              }}
             />
-          </div>
+            <div className="hidden sm:flex flex-col sm:w-1/4 p-4 bg-white shadow">
+              <PreviewResults
+                data={allResultsDataImages}
+                handleOnTab={handleOnTab}
+              />
+            </div>
+
+          </>
+
         )}
       </div>
     </div>
