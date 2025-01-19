@@ -13,12 +13,16 @@ import Paginator from "../../components/Paginator/Paginator";
 import PreviewResults from "../../components/PreviewResults/PreviewResults";
 import Allprojects from "../../components/AllProjects/Allprojects";
 import Projects from "../../components/Projects";
-import Experience from "../../components/Experience"; 
+import Experience from "../../components/Experience";
 
 import Logo from "../../components/Logo";
 import { Profile } from "../../components/Profile/Profile";
 import NotFoundResults from "./NotFoundResults";
 import img from '../../assets/Egv3.png'
+
+
+import { driver } from "driver.js";
+import "driver.js/dist/driver.css";
 
 export const SearchPage = () => {
   const navigate = useNavigate();
@@ -34,6 +38,7 @@ export const SearchPage = () => {
   const [allResultsPages, setAllResultsPages] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
   const [page, setPage] = useLocalStorageState('page', '1');
+  const [firstVisitSearch, setFirstVisitSearch] = useLocalStorageState('firstVisitSearch', false);
 
   const host = import.meta.env.VITE_HOST;
   const port = import.meta.env.VITE_PORT;
@@ -69,17 +74,17 @@ export const SearchPage = () => {
         return allResultsData.length === 0 ? (
           <NotFoundResults fetchSearchPortfolio={fetchSearchPortfolio} suggestionSearch={suggestion} />
         ) : (
-          <>
+          <div id="allResults">
             <AllResult data={allResultsData} />
             <Paginator phrase="Portafolio" totalPages={allResultsPages} />
-          </>
+          </div>
         );
       case "2":
         return <Allprojects data={allResultsData} />;
       case "3":
-        return <Projects  />;
+        return <Projects />;
       case "4":
-        return <Experience/>;
+        return <Experience />;
       default:
         return null;
     }
@@ -94,19 +99,24 @@ export const SearchPage = () => {
     "text-green-500",
   ];
 
-  const tabs =[{
+  const tabs = [{
     label: "Resultados",
-    value: "1"
-  },{
+    value: "1",
+    id: "results"
+  }, {
     label: "Proyectos",
-    value: "2"
-  },{
+    value: "2",
+    id: "projects"
+
+  }, {
     label: "Todos los proyectos",
-    value: "3"
-  },{
+    value: "3",
+    id: "allProjects"
+  }, {
     label: "Experiencia",
-    value: "4"
-  } ]
+    value: "4",
+    id: "experience"
+  }]
 
   async function fetchSearchPortfolio(query, page = 1, limit = 10) {
     setIsLoading(true);
@@ -148,9 +158,67 @@ export const SearchPage = () => {
     setSearchQuery(searchTerm);
   }, [searchTerm]);
 
+
+  useEffect(() => {
+    if (!firstVisitSearch) {
+      const steps = [
+        {
+          element: '#searchInput',
+          popover: {
+            title: 'Búsqueda',
+            description: 'En este campo puedes buscar proyectos utilizando palabras clave, ya sean tecnologías, nombres de proyectos, o cualquier término relacionado.'
+          }
+        },
+        {
+          element: '#allResults',
+          popover: {
+            title: 'Detalle de los Resultados',
+            description: 'Aquí verás una lista de los resultados relacionados con tu búsqueda. Al hacer clic en un proyecto, podrás ver más detalles sobre él, incluyendo información específica y relevante.'
+          }
+        },
+        {
+          element: '#results',
+          popover: {
+            title: 'Resultados',
+            description: 'Aquí se mostrarán los resultados relevantes basados en tu búsqueda. Navega para encontrar los proyectos que mejor se ajusten a tu consulta.'
+          }
+        },
+        {
+          element: '#projects',
+          popover: {
+            title: 'Proyectos',
+            description: 'Esta sección muestra todos los proyectos relacionados con tu búsqueda. Explora para ver detalles sobre cada uno.'
+          }
+        },
+        {
+          element: '#allProjects',
+          popover: {
+            title: 'Todos los Proyectos',
+            description: 'Si quieres explorar todos los proyectos disponibles, accede a esta sección donde podrás ver un listado completo.'
+          }
+        },
+        {
+          element: '#experience',
+          popover: {
+            title: 'Mi Experiencia Laboral',
+            description: 'Aquí podrás ver un resumen de los lugares donde he trabajado, incluyendo mis roles y los proyectos en los que he participado.'
+          }
+        }
+      ];
+      const driverObj = driver({
+        showProgress: true,
+        steps,
+        nextBtnText: 'Siguiente',
+        prevBtnText: 'Atrás',
+        doneBtnText: 'Finalizar'
+      });
+      driverObj.drive();
+      setFirstVisitSearch(true)
+    }
+  }, [])
+
   return (
     <div className="min-h-screen flex flex-col mt-[1%]">
-
       <Logo open={isLoading} />
       <header className="border-b flex flex-col sm:flex-row items-center px-4 py-2 justify-center sm:justify-start">
         <div
@@ -169,10 +237,17 @@ export const SearchPage = () => {
           </div>
         </div>
         <div className="flex w-full sm:justify-start justify-center">
-          <form className="w-full sm:w-auto max-w-md lg:max-w-2xl sm:ml-0 mx-auto">
+          <form
+            onSubmit={(e) => {
+              e.preventDefault();
+              if (!searchQuery?.trim()) return;
+              handleSearch();
+            }}
+
+            className="w-full sm:w-auto max-w-md lg:max-w-2xl sm:ml-0 mx-auto">
             <div>
               <div className="flex w-[350px] sm:w-[500px] mt-[5%] sm:mt-0">
-                <TextField
+                <TextField id="searchInput"
                   value={searchQuery}
                   onChange={handleChangetext}
                   fullWidth
@@ -182,8 +257,8 @@ export const SearchPage = () => {
                     },
                   }}
                   InputProps={{
-                    startAdornment: (
-                      <InputAdornment position="start">
+                    endAdornment: (
+                      <InputAdornment className="cursor-pointer" position="start">
                         <SearchIcon onClick={handleSearch} />
                       </InputAdornment>
                     ),
@@ -204,11 +279,11 @@ export const SearchPage = () => {
           onChange={handleChange}
           variant="scrollable"
           scrollButtons="auto"
-          aria-label="scrollable auto tabs example"
+          aria-label="scrollable auto"
         >
           {
             tabs.map((item, index) => (
-              <Tab sx={{ textTransform: 'none'   }} label={item.label} value={item.value} key={index} className="py-1 px-3 text-base md:text-lg md:py-2 md:px-4 rounded-md border border-gray-300 hover:bg-gray-100 cursor-pointer focus:outline-none focus:ring-0" />
+              <Tab sx={{ textTransform: 'none' }} id={item.id} label={item.label} value={item.value} key={index} className="py-1 px-3 text-base md:text-lg md:py-2 md:px-4 rounded-md border border-gray-300 hover:bg-gray-100 cursor-pointer focus:outline-none focus:ring-0" />
             ))
           }
         </Tabs>
@@ -228,6 +303,7 @@ export const SearchPage = () => {
               sx={{
                 backgroundColor: 'black',
                 height: '500px',
+                display: { xs: 'none', sm: 'block' }
               }}
             />
             <div className="hidden sm:flex flex-col sm:w-1/4 p-4 bg-white shadow">
@@ -236,9 +312,7 @@ export const SearchPage = () => {
                 handleOnTab={handleOnTab}
               />
             </div>
-
           </>
-
         )}
       </div>
     </div>

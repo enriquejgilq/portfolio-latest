@@ -21,9 +21,7 @@ const AllResult = ({ data = [] }) => {
           >
             {item.name}
           </h2>
-          <div className="text-sm text-green-700">
-            https://yourname.com/portfolio
-          </div>
+          
           <p className="text-sm mt-1 text-black ">{item.description}</p>
         </div>
       ))}

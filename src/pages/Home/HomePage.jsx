@@ -15,13 +15,22 @@ import Button from '@mui/material/Button';
 
 import { CiMenuKebab } from "react-icons/ci";
 
+import { useLocalStorageState } from '@toolpad/core/useLocalStorageState';
+
+import { driver } from "driver.js";
+import "driver.js/dist/driver.css";
+
+
 import img from '../../assets/Egv3.png'
 export default function Component() {
   const navigate = useNavigate();
 
   const [searchQuery, setSearchQuery] = useState("");
   const [searchHistory, setSearchHistory] = useState([]);
-   const technologies = [];
+  const [firstVisit, setFirstVisit] = useLocalStorageState('visit', false);
+
+
+  const technologies = [];
 
   const handleSearch = (e) => {
     const trimmedQuery = searchQuery.trim();
@@ -53,9 +62,10 @@ export default function Component() {
   const handleLucky = () => {
     console.log("I'm feeling lucky!");
   };
-  const searchFromTendency =(tendency)=>{
+  const searchFromTendency = (tendency) => {
     navigate(`/search?query=${tendency}`)
   }
+
   const title = ["P", "o", "r", "t", "a", "f", "o", "l", "i", "o"];
   const colors = [
     "text-blue-500",
@@ -63,7 +73,6 @@ export default function Component() {
     "text-yellow-500",
     "text-green-500",
   ];
-
   const tendencies = [
     { title: "React", value: "React" },
     { title: "css", value: "css" },
@@ -72,16 +81,74 @@ export default function Component() {
   ];
 
   useEffect(() => {
+    if (!firstVisit) {
+      const steps = [
+        {
+          element: '#search',
+          popover: {
+            title: 'Búsqueda',
+            description: 'En el campo de búsqueda de proyectos, puedes ingresar cualquier término, ya sea una tecnología, un nombre o lo que desees buscar.'
+          }
+        },
+        {
+          element: '#btnSearch',
+          popover: {
+            title: 'Botón de Búsqueda',
+            description: 'Haz clic en este botón para iniciar la búsqueda de proyectos.'
+          }
+        }
+      ];
+
+      if (window.innerWidth > 768) {
+        steps.splice(2, 0, {
+          element: '#otherbtn',
+          popover: {
+            title: 'Opción Alternativa',
+            description: 'Otra forma de buscar proyectos. Haz clic aquí para explorar diferentes opciones.'
+          }
+        });
+      } else {
+        steps.splice(2, 0, {
+          element: '#tendencies',
+          popover: {
+            title: 'Tendencias',
+            description: 'Estas son las tendencias en búsquedas de proyectos más populares.'
+          }
+        });
+      }
+      steps.push({
+        element: '#profileinfo',
+        popover: {
+          title: 'Información',
+          description: 'Aquí puedes encontrar información de contacto, incluyendo X, GitHub y LinkedIn.'
+        }
+      });
+
+      const driverObj = driver({
+        showProgress: true,
+        steps,
+        nextBtnText: 'Siguiente',
+        prevBtnText: 'Atrás',
+        doneBtnText: 'Finalizar'
+      });
+
+      driverObj.drive();
+      setFirstVisit(true)
+    }
+  }, [])
+
+
+  useEffect(() => {
     const storedHistory =
       JSON.parse(localStorage.getItem("searchHistory")) || [];
     setSearchHistory(storedHistory);
   }, []);
-  
+
   return (
     <div className="min-h-screen flex flex-col">
 
       <header className="flex justify-end items-center p-2 md:p-4">
-        <nav className="flex items-center space-x-2 md:space-x-4">
+        <nav id="profileinfo" className="flex items-center space-x-2 md:space-x-4">
           <Profile imgLogo={img} />
         </nav>
       </header>
@@ -102,6 +169,7 @@ export default function Component() {
           <div className="relative">
             <div className="w-full py-2 md:py-3 px-3 md:px-5 rounded-full border border-gray-200 focus-within:border-gray-300 shadow-lg">
               <Autocomplete
+                id="search"
                 clearIcon={null}
                 freeSolo
                 options={options}
@@ -118,7 +186,7 @@ export default function Component() {
                   </li>
                 )}
                 renderInput={(params) => (
-                  <TextField 
+                  <TextField
                     placeholder="Buscar proyectos"
                     {...params}
                     sx={{
@@ -138,6 +206,7 @@ export default function Component() {
             </div>
             <div className="absolute right-0 top-0 h-full flex items-center pr-2 md:pr-3 space-x-2 md:space-x-3">
               <Button
+                id="btnSearch"
                 disableRipple
                 onClick={handleSearch}
                 sx={{
@@ -162,7 +231,7 @@ export default function Component() {
 
           <div className="block md:hidden mt-2">
             <div className="text-left ml-2 mt-12 flex flex-row items-center text-black">
-              <Typography sx={{ fontWeight: "bold" }}>
+              <Typography id="tendencies" sx={{ fontWeight: "bold" }}>
                 Tendencias de búsquedas
               </Typography>
               <CiMenuKebab className="ml-auto" />
@@ -174,7 +243,7 @@ export default function Component() {
                 <div key={index}>
                   <ListItem>
                     <TrendingUpIcon sx={{ color: 'black', marginRight: '8px' }} />
-                    <ListItemText sx={{ color: 'black' }} primary={item.title} onClick={( )=>searchFromTendency(item.title)} />
+                    <ListItemText sx={{ color: 'black' }} primary={item.title} onClick={() => searchFromTendency(item.title)} />
                   </ListItem>
                   <Divider component="li" />
                 </div>
@@ -182,7 +251,7 @@ export default function Component() {
             </List>
           </div>
           <div className="flex flex-col md:flex-row justify-center mt-4 md:mt-8 space-y-2 md:space-y-0 md:space-x-4">
-            <button
+            <button id="otherbtn"
               onClick={handleSearch}
               className="hidden md:block px-4 py-2 bg-gray-100 text-gray-800 rounded hover:shadow transition-shadow duration-200 w-full md:w-auto"
             >

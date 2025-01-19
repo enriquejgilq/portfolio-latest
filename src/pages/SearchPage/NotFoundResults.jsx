@@ -39,7 +39,8 @@ function NotFoundResults({ suggestionSearch = [], fetchSearchPortfolio }) {
                             color: 'blue',
                             marginBottom: { xs: '4px', md: '0' },
                             marginTop: { xs: '4px', md: '0' },
-                            marginLeft: { md: '8px' }
+                            marginLeft: { md: '8px' },
+                            cursor:"pointer"
                         }}
                         onClick={() => handleSuggestionClick(suggestionSearch[0]?.description)}
                     >
