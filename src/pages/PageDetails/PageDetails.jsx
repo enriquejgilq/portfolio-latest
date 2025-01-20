@@ -13,8 +13,7 @@ export const PageDetails = () => {
   const [data, setData] = useState({});
   const [loading, setLoading] = useState(false);
   const host = import.meta.env.VITE_HOST;
-   const location = useLocation();
-
+  const location = useLocation();
   const idParams = new URLSearchParams(location.search);
   const id = idParams.get("id");
   const goBack = () => {
@@ -143,7 +142,7 @@ export const PageDetails = () => {
                 <div style={{ gap: "50px", margin: "1%" }} key={index}>
                   <Card elevation={3}>
                     <img
-                      src={item && ""}
+                      src={item ? item : ""}
                       alt={item ? item : ""}
                       width={400}
                       height={200}

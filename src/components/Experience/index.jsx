@@ -1,18 +1,24 @@
 import React, { useState, useEffect } from 'react'
 
 import Timeline from '@mui/lab/Timeline';
-import TimelineItem from '@mui/lab/TimelineItem';
+import TimelineItem,  { timelineItemClasses }  from '@mui/lab/TimelineItem';
 import TimelineSeparator from '@mui/lab/TimelineSeparator';
 import TimelineConnector from '@mui/lab/TimelineConnector';
 import TimelineContent from '@mui/lab/TimelineContent';
 import TimelineDot from '@mui/lab/TimelineDot';
 import { Typography } from '@mui/material';
+import { useMediaQuery } from "@mui/material";
+import { useTheme } from "@mui/material/styles";
+
 import { format } from 'date-fns';
 import Logo from '../../components/Logo'
 
 function Experience() {
     const [loading, setLoading] = useState(false);
     const [experience, setExperience] = useState([])
+
+    const theme = useTheme();
+    const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
 
     const host = import.meta.env.VITE_HOST;
  
@@ -49,7 +55,17 @@ function Experience() {
             {experience.length === 0 ? (
     <Typography> Sin Resultados</Typography>
 ) : (
-    <Timeline position="alternate">
+    <Timeline sx={
+        isMobile
+          ? {
+              [`& .${timelineItemClasses.root}:before`]: {
+                flex: 0,
+                padding: 0,
+              },
+            }
+          : {}
+      }
+      position={isMobile ? "left" : "alternate"}>
         {experience.map((item, index) => (
             <TimelineItem
                 key={item._id}
@@ -65,7 +81,7 @@ function Experience() {
                         sx={{
                             fontSize: { xs: '1.2rem', sm: '1.5rem' },
                             fontWeight: 'bold',
-                            zIndex: 10, // Ajusta el z-index aquí
+                            zIndex: 10,  
                         }}
                     >
                         {item.company}
