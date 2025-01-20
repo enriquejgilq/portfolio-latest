@@ -15,15 +15,14 @@ function Experience() {
     const [experience, setExperience] = useState([])
 
     const host = import.meta.env.VITE_HOST;
-    const port = import.meta.env.VITE_PORT;
-
+ 
     async function fetchSearchAllExperience() {
         setLoading(true);
         try {
             const endpoint = "getAllExperience";
 
             const response = await fetch(
-                `${host}${port}/api/${endpoint}`
+                `${host}/api/${endpoint}`
             );
 
             if (!response.ok) {

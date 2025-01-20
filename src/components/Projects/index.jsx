@@ -14,8 +14,8 @@ function Projects() {
 
 
     const host = import.meta.env.VITE_HOST;
-    const port = import.meta.env.VITE_PORT;
-    const onNavigate = (id) => {
+    
+     const onNavigate = (id) => {
         navigate(`/details?id=${id}`);
       }
       
@@ -25,7 +25,7 @@ function Projects() {
             const endpoint = "getAllPortfolio";
 
             const response = await fetch(
-                `${host}${port}/api/${endpoint}`
+                `${host}/api/${endpoint}`
             );
 
             if (!response.ok) {

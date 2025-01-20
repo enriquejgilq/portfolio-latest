@@ -13,8 +13,7 @@ export const PageDetails = () => {
   const [data, setData] = useState({});
   const [loading, setLoading] = useState(false);
   const host = import.meta.env.VITE_HOST;
-  const port = import.meta.env.VITE_PORT;
-  const location = useLocation();
+   const location = useLocation();
 
   const idParams = new URLSearchParams(location.search);
   const id = idParams.get("id");
@@ -25,7 +24,7 @@ export const PageDetails = () => {
     setLoading(true);
     const endpoint = "searchById";
     try {
-      const response = await fetch(`${host}${port}/api/${endpoint}?id=${id}`);
+      const response = await fetch(`${host}/api/${endpoint}?id=${id}`);
       if (!response.ok) {
         throw new Error(`Error: ${response.status}`);
       }

@@ -41,8 +41,7 @@ export const SearchPage = () => {
   const [firstVisitSearch, setFirstVisitSearch] = useLocalStorageState('firstVisitSearch', false);
 
   const host = import.meta.env.VITE_HOST;
-  const port = import.meta.env.VITE_PORT;
-
+ 
   const handleSearch = () => {
     if (searchQuery === "" || searchQuery === undefined || searchQuery === null)
       return;
@@ -124,7 +123,7 @@ export const SearchPage = () => {
       const endpoint = "searchPortfolio";
 
       const response = await fetch(
-        `${host}${port}/api/${endpoint}?query=${encodeURIComponent(
+        `${host}/api/${endpoint}?query=${encodeURIComponent(
           query
         )}&page=${page}&limit=${limit}`
       );
