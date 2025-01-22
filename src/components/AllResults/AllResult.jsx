@@ -1,3 +1,4 @@
+import { Typography } from "@mui/material";
 import React from "react";
 import { useNavigate } from "react-router-dom";
 
@@ -15,14 +16,14 @@ const AllResult = ({ data = [] }) => {
 
       {data.map((item, index) => (
         <div key={index} className="mb-8">
-          <h2
+          <Typography sx={{ fontSize: { xs: '14px', sm: '16px' }, fontWeight: 'bold' }}
             className="text-xl text-blue-700 hover:underline cursor-pointer"
             onClick={() => onPage(item._id)}
           >
             {item.name}
-          </h2>
+          </Typography>
           
-          <p className="text-sm mt-1 text-black ">{item.description}</p>
+          <Typography sx={{fontSize:'12px'}} className="text-sm mt-1 text-black sm:text-xs text-justify">{item.description}</Typography>
         </div>
       ))}
     </div>
