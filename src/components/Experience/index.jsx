@@ -17,8 +17,7 @@ function Experience() {
     const [loading, setLoading] = useState(false);
     const [experience, setExperience] = useState([])
 
-    console.log('11', experience)
-    const theme = useTheme();
+     const theme = useTheme();
     const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
 
     const host = import.meta.env.VITE_HOST;
