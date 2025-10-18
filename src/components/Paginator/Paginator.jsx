@@ -1,4 +1,4 @@
-import   { useState } from "react";
+import { useState } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 
 export default function Paginator({ phrase = "", totalPages = 0 }) {

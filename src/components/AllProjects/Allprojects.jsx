@@ -1,11 +1,18 @@
 import React, { useState } from "react";
-import { Drawer, Card, Typography, Button, useMediaQuery, useTheme, IconButton } from '@mui/material';
+import {
+  Drawer,
+  Card,
+  Typography,
+  Button,
+  useMediaQuery,
+  useTheme,
+  IconButton,
+} from "@mui/material";
 import Grid from "@mui/material/Grid2";
-import { Close } from '@mui/icons-material';
- import ArrowBackIosIcon from '@mui/icons-material/ArrowBackIos';
-import ArrowForwardIosIcon from '@mui/icons-material/ArrowForwardIos';
+import { Close } from "@mui/icons-material";
+import ArrowBackIosIcon from "@mui/icons-material/ArrowBackIos";
+import ArrowForwardIosIcon from "@mui/icons-material/ArrowForwardIos";
 import { useNavigate } from "react-router-dom";
-
 
 const Allprojects = ({ data = [] }) => {
   const theme = useTheme();
@@ -15,13 +22,13 @@ const Allprojects = ({ data = [] }) => {
   const [drawerContent, setDrawerContent] = useState(null);
   const [currentIndex, setCurrentIndex] = useState(0);
 
-  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
 
   const handleClick = (item, index) => {
     setDrawerContent(item);
     setCurrentIndex(index);
     setOpen(true);
-  }
+  };
 
   const handleCloseDrawer = () => {
     setOpen(false);
@@ -44,13 +51,13 @@ const Allprojects = ({ data = [] }) => {
 
   const onNavigate = (id) => {
     navigate(`/details?id=${id}`);
-  }
+  };
   function scrollContent(direction) {
-    const container = document.getElementById('scroll-container');
+    const container = document.getElementById("scroll-container");
     const scrollAmount = 100;
     container.scrollBy({
       left: direction * scrollAmount,
-      behavior: 'smooth'
+      behavior: "smooth",
     });
   }
   return (
@@ -73,18 +80,21 @@ const Allprojects = ({ data = [] }) => {
               key={index}
             >
               <div className="flex justify-center items-center">
-                <div style={{ width: 70, height: 40 }} className="flex justify-center items-center">
+                <div
+                  style={{ width: 70, height: 40 }}
+                  className="flex justify-center items-center"
+                >
                   <img
                     alt="img"
-                    height={'100%'}
-                    width={'100%'}
+                    height={"100%"}
+                    width={"100%"}
                     className="rounded-l-lg"
                     src={item.images[0]}
                   />
                 </div>
               </div>
               <div className="flex items-center justify-center w-3/5">
-                <Typography sx={{ fontWeight: '700' }} fontSize={12}>
+                <Typography sx={{ fontWeight: "700" }} fontSize={12}>
                   {item?.technology[0]}
                 </Typography>
               </div>
@@ -94,13 +104,14 @@ const Allprojects = ({ data = [] }) => {
         <IconButton
           className="focus:outline-none focus:ring-0"
           disableRipple
-          onClick={() => scrollContent(1)} >
+          onClick={() => scrollContent(1)}
+        >
           <ArrowForwardIosIcon fontSize="medium" />
         </IconButton>
       </div>
       <div className="flex mt-3 justify-center items-center  w-full">
         <Grid
-          sx={{ width: '100%' }}
+          sx={{ width: "100%" }}
           container
           spacing={{ xs: 2, md: 3 }}
           columns={{ xs: 4, sm: 8, md: 12 }}
@@ -111,22 +122,34 @@ const Allprojects = ({ data = [] }) => {
               <Grid
                 key={index}
                 item
-                xs={4} sm={4} md={4}
+                xs={4}
+                sm={4}
+                md={4}
                 className="flex justify-center flex-col items-center"
               >
-                <Card onClick={() => handleClick(item, index)}
+                <Card
+                  onClick={() => handleClick(item, index)}
                   className="p-5 transition-all duration-300 
                        h-[200px] w-full md:min-w-[400px] md:w-[200px] 
                         md:hover:scale-110 md:hover:shadow-2xl cursor-pointer"
                 >
-                  <img className="w-full h-full object-cover" src={item.images[0]} alt="img" />
+                  <img
+                    className="w-full h-full object-cover"
+                    src={item.images[0]}
+                    alt="img"
+                  />
                 </Card>
                 <div className="flex flex-col items-start whitespace-nowrap overflow-hidden text-ellipsis w-[300px]  md:min-w-[400px] md:w-[200px]">
-
-                  <Typography onClick={() => onNavigate(item._id)} fontSize={12}
+                  <Typography
+                    onClick={() => onNavigate(item._id)}
+                    fontSize={12}
                     className="text-center cursor-pointer hover:underline"
-                  >{item.description}</Typography>
-                  <Typography fontWeight={'bold'} className="text-center">{item.name}</Typography>
+                  >
+                    {item.description}
+                  </Typography>
+                  <Typography fontWeight={"bold"} className="text-center">
+                    {item.name}
+                  </Typography>
                 </div>
               </Grid>
             );
@@ -134,40 +157,38 @@ const Allprojects = ({ data = [] }) => {
         </Grid>
       </div>
 
-
-
       <Drawer
         anchor={isMobile ? "bottom" : "right"}
         open={open}
         onClose={handleCloseDrawer}
         sx={{
-          width: isMobile ? '100%' : 420,
+          width: isMobile ? "100%" : 420,
           flexShrink: 0,
-          '& .MuiDrawer-paper': {
-            width: isMobile ? '100%' : 420,
-            boxSizing: 'border-box',
-            height: isMobile ? 'auto' : '100%',
-            overflow: 'auto',
+          "& .MuiDrawer-paper": {
+            width: isMobile ? "100%" : 420,
+            boxSizing: "border-box",
+            height: isMobile ? "auto" : "100%",
+            overflow: "auto",
           },
         }}
       >
-
-        <div style={{ padding: '20px', width: '100%' }}>
-
+        <div style={{ padding: "20px", width: "100%" }}>
           {!isMobile && (
             <div className="flex justify-end mb-2">
               <IconButton
                 className="focus:outline-none focus:ring-0"
                 disableRipple
                 onClick={goToPreviousItem}
-                disabled={currentIndex === 0}>
+                disabled={currentIndex === 0}
+              >
                 <ArrowBackIosIcon fontSize="medium" />
               </IconButton>
               <IconButton
                 className="focus:outline-none focus:ring-0"
                 disableRipple
                 onClick={goToNextItem}
-                disabled={currentIndex === data.length - 1}>
+                disabled={currentIndex === data.length - 1}
+              >
                 <ArrowForwardIosIcon fontSize="medium" />
               </IconButton>
               <IconButton onClick={handleCloseDrawer}>
@@ -177,12 +198,17 @@ const Allprojects = ({ data = [] }) => {
           )}
           <Typography variant="h6">Detalles del proyecto</Typography>
           <Typography variant="h5">{drawerContent?.name}</Typography>
-          <img src={drawerContent?.images[0]} alt="img" style={{ width: '100%' }} />
+          <img
+            src={drawerContent?.images[0]}
+            alt="img"
+            style={{ width: "100%" }}
+          />
           <Typography variant="body1">{drawerContent?.description}</Typography>
-          <Button onClick={handleCloseDrawer} sx={{ marginTop: 2 }}>Cerrar</Button>
+          <Button onClick={handleCloseDrawer} sx={{ marginTop: 2 }}>
+            Cerrar
+          </Button>
         </div>
       </Drawer>
-
     </div>
   );
 };

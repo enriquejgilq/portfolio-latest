@@ -6,7 +6,7 @@ import { Button } from "@mui/material";
 import { FaLinkedinIn, FaGithub } from "react-icons/fa";
 import { FaXTwitter } from "react-icons/fa6";
 
-export const Profile = ({ imgLogo="" }) => {
+export const Profile = ({ imgLogo = "" }) => {
   const [anchorEl, setAnchorEl] = useState(null);
   const handleClick = (event) => {
     setAnchorEl(event.currentTarget);
@@ -19,25 +19,29 @@ export const Profile = ({ imgLogo="" }) => {
   const open = Boolean(anchorEl);
   const id = open ? "simple-popover" : undefined;
 
-  const socialMedia = [{
-    name: 'twitter',
-    link: 'https://x.com/enriquegilq',
-    icon: FaXTwitter,
-    size: '40px',
-    color: 'black'
-  }, {
-    name: 'linkedin',
-    link: 'https://www.linkedin.com/in/enriquegilq/',
-    icon: FaLinkedinIn,
-    size: '40px',
-    color: 'black'
-  }, {
-    name: 'github',
-    link: 'https://github.com/enriquejgilq',
-    icon: FaGithub,
-    size: '40px',
-    color: 'black'
-  }]
+  const socialMedia = [
+    {
+      name: "twitter",
+      link: "https://x.com/enriquegilq",
+      icon: FaXTwitter,
+      size: "40px",
+      color: "black",
+    },
+    {
+      name: "linkedin",
+      link: "https://www.linkedin.com/in/enriquegilq/",
+      icon: FaLinkedinIn,
+      size: "40px",
+      color: "black",
+    },
+    {
+      name: "github",
+      link: "https://github.com/enriquejgilq",
+      icon: FaGithub,
+      size: "40px",
+      color: "black",
+    },
+  ];
 
   return (
     <>
@@ -67,7 +71,9 @@ export const Profile = ({ imgLogo="" }) => {
         <div className="flex flex-col w-72 h-[250px]">
           <div className="flex flex-row bg-gray-300 h-12 items-center justify-between px-2">
             <div className="flex-1 flex justify-center">
-              <Typography sx={{ fontFamily: '"Open Sans", Arial, sans-serif' }}>¡Hola,Mucho gusto! </Typography>
+              <Typography sx={{ fontFamily: '"Open Sans", Arial, sans-serif' }}>
+                ¡Hola,Mucho gusto!{" "}
+              </Typography>
             </div>
             <div className="flex justify-end">
               <CloseSharpIcon
@@ -106,11 +112,13 @@ export const Profile = ({ imgLogo="" }) => {
               {socialMedia.map((item, index) => {
                 const IconComponent = item.icon;
                 return (
-                  <a key={index}
+                  <a
+                    key={index}
                     href={item.link}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="cursor-pointer hover:scale-150 hover:shadow-xl transition-all duration-300">
+                    className="cursor-pointer hover:scale-150 hover:shadow-xl transition-all duration-300"
+                  >
                     <IconComponent size={item.size} color={item.color} />
                   </a>
                 );

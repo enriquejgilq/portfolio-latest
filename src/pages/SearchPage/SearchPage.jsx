@@ -1,12 +1,12 @@
 import { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import InputAdornment from '@mui/material/InputAdornment';
-import TextField from '@mui/material/TextField';
-import SearchIcon from '@mui/icons-material/Search';
-import Tabs from '@mui/material/Tabs';
-import Tab from '@mui/material/Tab';
-import Divider from '@mui/material/Divider';
-import { useLocalStorageState } from '@toolpad/core/useLocalStorageState';
+import InputAdornment from "@mui/material/InputAdornment";
+import TextField from "@mui/material/TextField";
+import SearchIcon from "@mui/icons-material/Search";
+import Tabs from "@mui/material/Tabs";
+import Tab from "@mui/material/Tab";
+import Divider from "@mui/material/Divider";
+import { useLocalStorageState } from "@toolpad/core/useLocalStorageState";
 
 import AllResult from "../../components/AllResults/AllResult";
 import Paginator from "../../components/Paginator/Paginator";
@@ -18,8 +18,7 @@ import Experience from "../../components/Experience";
 import Logo from "../../components/Logo";
 import { Profile } from "../../components/Profile/Profile";
 import NotFoundResults from "./NotFoundResults";
-import img from '../../assets/Egv3.png'
-
+import img from "../../assets/Egv3.png";
 
 import { driver } from "driver.js";
 import "driver.js/dist/driver.css";
@@ -37,11 +36,14 @@ export const SearchPage = () => {
   const [suggestion, setSuggestion] = useState([]);
   const [allResultsPages, setAllResultsPages] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
-  const [page, setPage] = useLocalStorageState('page', '1');
-  const [firstVisitSearch, setFirstVisitSearch] = useLocalStorageState('firstVisitSearch', false);
+  const [page, setPage] = useLocalStorageState("page", "1");
+  const [firstVisitSearch, setFirstVisitSearch] = useLocalStorageState(
+    "firstVisitSearch",
+    false,
+  );
 
   const host = import.meta.env.VITE_HOST;
- 
+
   const handleSearch = () => {
     if (searchQuery === "" || searchQuery === undefined || searchQuery === null)
       return;
@@ -56,7 +58,7 @@ export const SearchPage = () => {
   };
 
   const handleChange = (event, newValue) => {
-    setPage(newValue)
+    setPage(newValue);
   };
 
   const handleChangetext = (event) => {
@@ -71,7 +73,10 @@ export const SearchPage = () => {
     switch (page) {
       case "1":
         return allResultsData.length === 0 ? (
-          <NotFoundResults fetchSearchPortfolio={fetchSearchPortfolio} suggestionSearch={suggestion} />
+          <NotFoundResults
+            fetchSearchPortfolio={fetchSearchPortfolio}
+            suggestionSearch={suggestion}
+          />
         ) : (
           <div id="allResults">
             <AllResult data={allResultsData} />
@@ -98,24 +103,28 @@ export const SearchPage = () => {
     "text-green-500",
   ];
 
-  const tabs = [{
-    label: "Resultados",
-    value: "1",
-    id: "results"
-  }, {
-    label: "Proyectos",
-    value: "2",
-    id: "projects"
-
-  }, {
-    label: "Todos los proyectos",
-    value: "3",
-    id: "allProjects"
-  }, {
-    label: "Experiencia",
-    value: "4",
-    id: "experience"
-  }]
+  const tabs = [
+    {
+      label: "Resultados",
+      value: "1",
+      id: "results",
+    },
+    {
+      label: "Proyectos",
+      value: "2",
+      id: "projects",
+    },
+    {
+      label: "Todos los proyectos",
+      value: "3",
+      id: "allProjects",
+    },
+    {
+      label: "Experiencia",
+      value: "4",
+      id: "experience",
+    },
+  ];
 
   async function fetchSearchPortfolio(query, page = 1, limit = 10) {
     setIsLoading(true);
@@ -124,8 +133,8 @@ export const SearchPage = () => {
 
       const response = await fetch(
         `${host}/api/${endpoint}?query=${encodeURIComponent(
-          query
-        )}&page=${page}&limit=${limit}`
+          query,
+        )}&page=${page}&limit=${limit}`,
       );
 
       if (!response.ok) {
@@ -138,7 +147,6 @@ export const SearchPage = () => {
       setSuggestion(data.suggestions ? data.suggestions : []);
       setAllResultsDataImages(onlyImages);
       setAllResultsPages(data?.totalPages);
-
     } catch (error) {
       console.error("Error en la búsqueda:", error);
       setIsLoading(false);
@@ -157,64 +165,69 @@ export const SearchPage = () => {
     setSearchQuery(searchTerm);
   }, [searchTerm]);
 
-
   useEffect(() => {
     if (!firstVisitSearch) {
       const steps = [
         {
-          element: '#searchInput',
+          element: "#searchInput",
           popover: {
-            title: 'Búsqueda',
-            description: 'En este campo puedes buscar proyectos utilizando palabras clave, ya sean tecnologías, nombres de proyectos, o cualquier término relacionado.'
-          }
+            title: "Búsqueda",
+            description:
+              "En este campo puedes buscar proyectos utilizando palabras clave, ya sean tecnologías, nombres de proyectos, o cualquier término relacionado.",
+          },
         },
         {
-          element: '#allResults',
+          element: "#allResults",
           popover: {
-            title: 'Detalle de los Resultados',
-            description: 'Aquí verás una lista de los resultados relacionados con tu búsqueda. Al hacer clic en un proyecto, podrás ver más detalles sobre él, incluyendo información específica y relevante.'
-          }
+            title: "Detalle de los Resultados",
+            description:
+              "Aquí verás una lista de los resultados relacionados con tu búsqueda. Al hacer clic en un proyecto, podrás ver más detalles sobre él, incluyendo información específica y relevante.",
+          },
         },
         {
-          element: '#results',
+          element: "#results",
           popover: {
-            title: 'Resultados',
-            description: 'Aquí se mostrarán los resultados relevantes basados en tu búsqueda. Navega para encontrar los proyectos que mejor se ajusten a tu consulta.'
-          }
+            title: "Resultados",
+            description:
+              "Aquí se mostrarán los resultados relevantes basados en tu búsqueda. Navega para encontrar los proyectos que mejor se ajusten a tu consulta.",
+          },
         },
         {
-          element: '#projects',
+          element: "#projects",
           popover: {
-            title: 'Proyectos',
-            description: 'Esta sección muestra todos los proyectos relacionados con tu búsqueda. Explora para ver detalles sobre cada uno.'
-          }
+            title: "Proyectos",
+            description:
+              "Esta sección muestra todos los proyectos relacionados con tu búsqueda. Explora para ver detalles sobre cada uno.",
+          },
         },
         {
-          element: '#allProjects',
+          element: "#allProjects",
           popover: {
-            title: 'Todos los Proyectos',
-            description: 'Si quieres explorar todos los proyectos disponibles, accede a esta sección donde podrás ver un listado completo.'
-          }
+            title: "Todos los Proyectos",
+            description:
+              "Si quieres explorar todos los proyectos disponibles, accede a esta sección donde podrás ver un listado completo.",
+          },
         },
         {
-          element: '#experience',
+          element: "#experience",
           popover: {
-            title: 'Mi Experiencia Laboral',
-            description: 'Aquí podrás ver un resumen de los lugares donde he trabajado, incluyendo mis roles y los proyectos en los que he participado.'
-          }
-        }
+            title: "Mi Experiencia Laboral",
+            description:
+              "Aquí podrás ver un resumen de los lugares donde he trabajado, incluyendo mis roles y los proyectos en los que he participado.",
+          },
+        },
       ];
       const driverObj = driver({
         showProgress: true,
         steps,
-        nextBtnText: 'Siguiente',
-        prevBtnText: 'Atrás',
-        doneBtnText: 'Finalizar'
+        nextBtnText: "Siguiente",
+        prevBtnText: "Atrás",
+        doneBtnText: "Finalizar",
       });
       driverObj.drive();
-      setFirstVisitSearch(true)
+      setFirstVisitSearch(true);
     }
-  }, [])
+  }, []);
 
   return (
     <div className="min-h-screen flex flex-col mt-[1%]">
@@ -227,12 +240,14 @@ export const SearchPage = () => {
           <div className="flex w-full justify-center sm:justify-start">
             <h1 className="text-3xl font-extrabold mr-4 tracking-tight drop-shadow-md">
               {title.map((item, index) => (
-                <span key={index} className={`${colors[index % colors.length]} drop-shadow-lg`}>
+                <span
+                  key={index}
+                  className={`${colors[index % colors.length]} drop-shadow-lg`}
+                >
                   {item}
                 </span>
               ))}
             </h1>
-
           </div>
         </div>
         <div className="flex w-full sm:justify-start justify-center">
@@ -242,11 +257,12 @@ export const SearchPage = () => {
               if (!searchQuery?.trim()) return;
               handleSearch();
             }}
-
-            className="w-full sm:w-auto max-w-md lg:max-w-2xl sm:ml-0 mx-auto">
+            className="w-full sm:w-auto max-w-md lg:max-w-2xl sm:ml-0 mx-auto"
+          >
             <div>
               <div className="flex w-[350px] sm:w-[500px] mt-[5%] sm:mt-0">
-                <TextField id="searchInput"
+                <TextField
+                  id="searchInput"
                   value={searchQuery}
                   onChange={handleChangetext}
                   fullWidth
@@ -257,7 +273,10 @@ export const SearchPage = () => {
                   }}
                   InputProps={{
                     endAdornment: (
-                      <InputAdornment className="cursor-pointer" position="start">
+                      <InputAdornment
+                        className="cursor-pointer"
+                        position="start"
+                      >
                         <SearchIcon onClick={handleSearch} />
                       </InputAdornment>
                     ),
@@ -280,17 +299,23 @@ export const SearchPage = () => {
           scrollButtons="auto"
           aria-label="scrollable auto"
         >
-          {
-            tabs.map((item, index) => (
-              <Tab sx={{ textTransform: 'none' }} id={item.id} label={item.label} value={item.value} key={index} className="py-1 px-3 text-base md:text-lg md:py-2 md:px-4 rounded-md border border-gray-300 hover:bg-gray-100 cursor-pointer focus:outline-none focus:ring-0" />
-            ))
-          }
+          {tabs.map((item, index) => (
+            <Tab
+              sx={{ textTransform: "none" }}
+              id={item.id}
+              label={item.label}
+              value={item.value}
+              key={index}
+              className="py-1 px-3 text-base md:text-lg md:py-2 md:px-4 rounded-md border border-gray-300 hover:bg-gray-100 cursor-pointer focus:outline-none focus:ring-0"
+            />
+          ))}
         </Tabs>
       </div>
       <div className="flex flex-col sm:flex-row items-start mx-4 sm:mx-[10%] mt-4">
         <div
-          className={`${page === "1" && allResultsData.length > 0 ? "sm:w-3/4" : "w-full"
-            }`}
+          className={`${
+            page === "1" && allResultsData.length > 0 ? "sm:w-3/4" : "w-full"
+          }`}
         >
           {renderTabContent()}
         </div>
@@ -300,9 +325,9 @@ export const SearchPage = () => {
               orientation="vertical"
               flexItem
               sx={{
-                backgroundColor: 'black',
-                height: '500px',
-                display: { xs: 'none', sm: 'block' }
+                backgroundColor: "black",
+                height: "500px",
+                display: { xs: "none", sm: "block" },
               }}
             />
             <div className="hidden sm:flex flex-col sm:w-1/4 p-4 bg-white shadow">

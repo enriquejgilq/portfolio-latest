@@ -16,14 +16,20 @@ const AllResult = ({ data = [] }) => {
 
       {data.map((item, index) => (
         <div key={index} className="mb-8">
-          <Typography sx={{ fontSize: { xs: '14px', sm: '16px' }, fontWeight: 'bold' }}
+          <Typography
+            sx={{ fontSize: { xs: "14px", sm: "16px" }, fontWeight: "bold" }}
             className="text-xl text-blue-700 hover:underline cursor-pointer"
             onClick={() => onPage(item._id)}
           >
             {item.name}
           </Typography>
-          
-          <Typography sx={{fontSize:'12px'}} className="text-sm mt-1 text-black sm:text-xs text-justify">{item.description}</Typography>
+
+          <Typography
+            sx={{ fontSize: "12px" }}
+            className="text-sm mt-1 text-black sm:text-xs text-justify"
+          >
+            {item.description}
+          </Typography>
         </div>
       ))}
     </div>

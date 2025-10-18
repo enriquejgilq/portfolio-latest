@@ -11,24 +11,27 @@ import ListItem from "@mui/material/ListItem";
 import ListItemText from "@mui/material/ListItemText";
 import Divider from "@mui/material/Divider";
 import { Typography } from "@mui/material";
-import Button from '@mui/material/Button';
+import Button from "@mui/material/Button";
+import Footer from "../../components/Footer/Footer";
+import Logo from "../../components/Logo";
 
 import { CiMenuKebab } from "react-icons/ci";
 
-import { useLocalStorageState } from '@toolpad/core/useLocalStorageState';
+import { useLocalStorageState } from "@toolpad/core/useLocalStorageState";
 
 import { driver } from "driver.js";
 import "driver.js/dist/driver.css";
 
-
-import img from '../../assets/Egv3.png'
+import img from "../../assets/Egv3.png";
 export default function Component() {
   const navigate = useNavigate();
-
+ const host = import.meta.env.VITE_HOST;
+ const endpoint = "visits";
   const [searchQuery, setSearchQuery] = useState("");
   const [searchHistory, setSearchHistory] = useState([]);
-  const [firstVisit, setFirstVisit] = useLocalStorageState('visit', false);
-
+  const [firstVisit, setFirstVisit] = useLocalStorageState("visit", false);
+ const [visits, setVisits] = useState(0);
+  const [loading, setLoading] = useState(true);  
 
   const technologies = [];
 
@@ -41,7 +44,6 @@ export default function Component() {
   };
 
   const handleSelection = (event, newValue) => {
-
     if (newValue === null || newValue === undefined || newValue === "") return;
 
     if (newValue && !searchHistory.includes(newValue)) {
@@ -63,8 +65,8 @@ export default function Component() {
     console.log("I'm feeling lucky!");
   };
   const searchFromTendency = (tendency) => {
-    navigate(`/search?query=${tendency}`)
-  }
+    navigate(`/search?query=${tendency}`);
+  };
 
   const title = ["P", "o", "r", "t", "a", "f", "o", "l", "i", "o"];
   const colors = [
@@ -84,59 +86,63 @@ export default function Component() {
     if (!firstVisit) {
       const steps = [
         {
-          element: '#search',
+          element: "#search",
           popover: {
-            title: 'Búsqueda',
-            description: 'En el campo de búsqueda de proyectos, puedes ingresar cualquier término, ya sea una tecnología, un nombre o lo que desees buscar.'
-          }
+            title: "Búsqueda",
+            description:
+              "En el campo de búsqueda de proyectos, puedes ingresar cualquier término, ya sea una tecnología, un nombre o lo que desees buscar.",
+          },
         },
         {
-          element: '#btnSearch',
+          element: "#btnSearch",
           popover: {
-            title: 'Botón de Búsqueda',
-            description: 'Haz clic en este botón para iniciar la búsqueda de proyectos.'
-          }
-        }
+            title: "Botón de Búsqueda",
+            description:
+              "Haz clic en este botón para iniciar la búsqueda de proyectos.",
+          },
+        },
       ];
 
       if (window.innerWidth > 768) {
         steps.splice(2, 0, {
-          element: '#otherbtn',
+          element: "#otherbtn",
           popover: {
-            title: 'Opción Alternativa',
-            description: 'Otra forma de buscar proyectos. Haz clic aquí para explorar diferentes opciones.'
-          }
+            title: "Opción Alternativa",
+            description:
+              "Otra forma de buscar proyectos. Haz clic aquí para explorar diferentes opciones.",
+          },
         });
       } else {
         steps.splice(2, 0, {
-          element: '#tendencies',
+          element: "#tendencies",
           popover: {
-            title: 'Tendencias',
-            description: 'Estas son las tendencias en búsquedas de proyectos más populares.'
-          }
+            title: "Tendencias",
+            description:
+              "Estas son las tendencias en búsquedas de proyectos más populares.",
+          },
         });
       }
       steps.push({
-        element: '#profileinfo',
+        element: "#profileinfo",
         popover: {
-          title: 'Información',
-          description: 'Aquí puedes encontrar información de contacto, incluyendo X, GitHub y LinkedIn.'
-        }
+          title: "Información",
+          description:
+            "Aquí puedes encontrar información de contacto, incluyendo X, GitHub y LinkedIn.",
+        },
       });
 
       const driverObj = driver({
         showProgress: true,
         steps,
-        nextBtnText: 'Siguiente',
-        prevBtnText: 'Atrás',
-        doneBtnText: 'Finalizar'
+        nextBtnText: "Siguiente",
+        prevBtnText: "Atrás",
+        doneBtnText: "Finalizar",
       });
 
       driverObj.drive();
-      setFirstVisit(true)
+      setFirstVisit(true);
     }
-  }, [])
-
+  }, []);
 
   useEffect(() => {
     const storedHistory =
@@ -144,11 +150,30 @@ export default function Component() {
     setSearchHistory(storedHistory);
   }, []);
 
+  useEffect(() => {
+    const fetchVisits = async () => {
+      try {
+        const response = await fetch( `${host}/api/${endpoint}` );
+        const data = await response.json();
+        setVisits(data.visits);
+      } catch (err) {
+        console.error("Error fetching visits:", err);
+      } finally {
+        setLoading(false);  
+      }
+    };
+
+    fetchVisits();
+  }, []);
+
   return (
     <div className="min-h-screen flex flex-col">
-
+       <Logo open={loading} />
       <header className="flex justify-end items-center p-2 md:p-4">
-        <nav id="profileinfo" className="flex items-center space-x-2 md:space-x-4">
+        <nav
+          id="profileinfo"
+          className="flex items-center space-x-2 md:space-x-4"
+        >
           <Profile imgLogo={img} />
         </nav>
       </header>
@@ -210,15 +235,15 @@ export default function Component() {
                 disableRipple
                 onClick={handleSearch}
                 sx={{
-                  '&:hover': {
-                    backgroundColor: 'transparent',
+                  "&:hover": {
+                    backgroundColor: "transparent",
                   },
-                  '&:active': {
-                    backgroundColor: 'transparent',
-                    boxShadow: 'none',
+                  "&:active": {
+                    backgroundColor: "transparent",
+                    boxShadow: "none",
                   },
-                  '&:focus': {
-                    outline: 'none',
+                  "&:focus": {
+                    outline: "none",
                   },
                 }}
                 type="submit"
@@ -235,15 +260,20 @@ export default function Component() {
                 Tendencias de búsquedas
               </Typography>
               <CiMenuKebab className="ml-auto" />
-
             </div>
 
             <List>
               {tendencies.map((item, index) => (
                 <div key={index}>
                   <ListItem>
-                    <TrendingUpIcon sx={{ color: 'black', marginRight: '8px' }} />
-                    <ListItemText sx={{ color: 'black' }} primary={item.title} onClick={() => searchFromTendency(item.title)} />
+                    <TrendingUpIcon
+                      sx={{ color: "black", marginRight: "8px" }}
+                    />
+                    <ListItemText
+                      sx={{ color: "black" }}
+                      primary={item.title}
+                      onClick={() => searchFromTendency(item.title)}
+                    />
                   </ListItem>
                   <Divider component="li" />
                 </div>
@@ -251,7 +281,8 @@ export default function Component() {
             </List>
           </div>
           <div className="flex flex-col md:flex-row justify-center mt-4 md:mt-8 space-y-2 md:space-y-0 md:space-x-4">
-            <button id="otherbtn"
+            <button
+              id="otherbtn"
               onClick={handleSearch}
               className="hidden md:block px-4 py-2 bg-gray-100 text-gray-800 rounded hover:shadow transition-shadow duration-200 w-full md:w-auto"
             >
@@ -265,8 +296,8 @@ export default function Component() {
               Voy a tener suerte
             </button>*/}
           </div>
-
         </form>
+        <Footer visits={visits} />
       </main>
     </div>
   );

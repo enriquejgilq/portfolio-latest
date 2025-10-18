@@ -48,9 +48,14 @@ export const PageDetails = () => {
         <header className="border-b">
           <nav className="container mx-auto flex items-center justify-between p-4">
             <div className="flex items-center w-[100%] gap-2">
-              <ArrowBackSharpIcon className="cursor-pointer text-black" onClick={goBack} />
+              <ArrowBackSharpIcon
+                className="cursor-pointer text-black"
+                onClick={goBack}
+              />
               <LaptopChromebookIcon className="text-black" />
-              <span className="text-lg font-medium text-black">Detalles del proyecto</span>
+              <span className="text-lg font-medium text-black">
+                Detalles del proyecto
+              </span>
             </div>
             <div className="hidden md:flex items-center gap-6">
               <a
