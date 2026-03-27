@@ -21,8 +21,7 @@ function Experience() {
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
 
   const host = import.meta.env.VITE_HOST;
-
-  async function fetchSearchAllExperience() {
+   async function fetchSearchAllExperience() {
     setLoading(true);
     try {
       const endpoint = "getAllExperience";

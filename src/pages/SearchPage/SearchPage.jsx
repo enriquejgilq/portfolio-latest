@@ -14,7 +14,7 @@ import PreviewResults from "../../components/PreviewResults/PreviewResults";
 import Allprojects from "../../components/AllProjects/Allprojects";
 import Projects from "../../components/Projects";
 import Experience from "../../components/Experience";
-
+ 
 import Logo from "../../components/Logo";
 import { Profile } from "../../components/Profile/Profile";
 import NotFoundResults from "./NotFoundResults";
@@ -22,6 +22,7 @@ import img from "../../assets/Egv3.png";
 
 import { driver } from "driver.js";
 import "driver.js/dist/driver.css";
+import { ImageGallery } from "../../components/Gallery/ImageGallery";
 
 export const SearchPage = () => {
   const navigate = useNavigate();
@@ -86,7 +87,20 @@ export const SearchPage = () => {
       case "2":
         return <Allprojects data={allResultsData} />;
       case "3":
-        return <Projects />;
+        const galleryImages = allResultsData.map((project) => ({
+          id: project._id,
+          src: project.images[0],
+          alt: project.description || project.name,
+          title: project.name,
+          category: project.name || "Sin Nombre",
+          projectImages: project.images,
+        }));
+        return (
+          <ImageGallery
+            images={galleryImages}
+            columns={{ mobile: 1, tablet: 2, desktop: 3 }}
+          />
+        );
       case "4":
         return <Experience />;
       default:
@@ -153,6 +167,74 @@ export const SearchPage = () => {
       return null;
     }
   }
+
+  /*
+  const images = [
+    {
+      id: "1",
+      src: "https://upload.wikimedia.org/wikipedia/commons/thumb/5/52/Spider-Man.jpg/500px-Spider-Man.jpg",
+      alt: "Arquitectura moderna con líneas limpias",
+      title: "Diseño Contemporáneo",
+      category: "arquitectura",
+    },
+    {
+      id: "2",
+      src: "https://upload.wikimedia.org/wikipedia/commons/thumb/5/52/Spider-Man.jpg/500px-Spider-Man.jpg",
+      alt: "Interior minimalista elegante",
+      title: "Espacio Minimalista",
+      category: "interiores",
+    },
+    {
+      id: "3",
+      src: "https://upload.wikimedia.org/wikipedia/commons/thumb/5/52/Spider-Man.jpg/500px-Spider-Man.jpg",
+      alt: "Arte geométrico abstracto",
+      title: "Geometría Abstracta",
+      category: "arte",
+    },
+    {
+      id: "4",
+      src: "https://upload.wikimedia.org/wikipedia/commons/thumb/5/52/Spider-Man.jpg/500px-Spider-Man.jpg",
+      alt: "Paisaje natural impresionante",
+      title: "Naturaleza Pura",
+      category: "naturaleza",
+    },
+    {
+      id: "5",
+      src: "https://upload.wikimedia.org/wikipedia/commons/thumb/5/52/Spider-Man.jpg/500px-Spider-Man.jpg",
+      alt: "Fotografía urbana de calle",
+      title: "Vida Urbana",
+      category: "fotografía",
+    },
+    {
+      id: "6",
+      src: "https://upload.wikimedia.org/wikipedia/commons/thumb/5/52/Spider-Man.jpg/500px-Spider-Man.jpg",
+      alt: "Diseño de producto elegante",
+      title: "Diseño de Producto",
+      category: "diseño",
+    },
+    {
+      id: "7",
+      src: "/creative-workspace.png",
+      alt: "Espacio de trabajo creativo",
+      title: "Espacio Creativo",
+      category: "interiores",
+    },
+    {
+      id: "8",
+      src: "https://upload.wikimedia.org/wikipedia/commons/thumb/5/52/Spider-Man.jpg/500px-Spider-Man.jpg",
+      alt: "Tecnología moderna",
+      title: "Innovación Tech",
+      category: "tecnología",
+    },
+    {
+      id: "9",
+      src: "https://upload.wikimedia.org/wikipedia/commons/thumb/5/52/Spider-Man.jpg/500px-Spider-Man.jpg",
+      alt: "Composición artística",
+      title: "Arte Contemporáneo",
+      category: "arte",
+    },
+  ];
+  */
 
   useEffect(() => {
     if (!searchTerm) return;

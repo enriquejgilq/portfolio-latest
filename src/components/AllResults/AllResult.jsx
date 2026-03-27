@@ -8,7 +8,7 @@ const AllResult = ({ data = [] }) => {
   const onPage = (id) => {
     navigate(`/details?id=${id}`);
   };
-  return (
+   return (
     <div className="p-4 mx-auto text-left">
       <div className="mb-4 text-sm text-gray-600">
         About {data.length} results

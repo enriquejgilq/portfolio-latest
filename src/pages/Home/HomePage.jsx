@@ -14,7 +14,7 @@ import { Typography } from "@mui/material";
 import Button from "@mui/material/Button";
 import Footer from "../../components/Footer/Footer";
 import Logo from "../../components/Logo";
-
+ 
 import { CiMenuKebab } from "react-icons/ci";
 
 import { useLocalStorageState } from "@toolpad/core/useLocalStorageState";
@@ -23,6 +23,7 @@ import { driver } from "driver.js";
 import "driver.js/dist/driver.css";
 
 import img from "../../assets/Egv3.png";
+import { ImageGallery } from "../../components/Gallery/ImageGallery";
 export default function Component() {
   const navigate = useNavigate();
  const host = import.meta.env.VITE_HOST;
@@ -67,7 +68,7 @@ export default function Component() {
   const searchFromTendency = (tendency) => {
     navigate(`/search?query=${tendency}`);
   };
-
+ 
   const title = ["P", "o", "r", "t", "a", "f", "o", "l", "i", "o"];
   const colors = [
     "text-blue-500",
@@ -230,6 +231,7 @@ export default function Component() {
               />
             </div>
             <div className="absolute right-0 top-0 h-full flex items-center pr-2 md:pr-3 space-x-2 md:space-x-3">
+
               <Button
                 id="btnSearch"
                 disableRipple
