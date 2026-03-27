@@ -18,9 +18,10 @@ interface ImageGalleryProps {
     tablet: number
     desktop: number
   }
+  onImageClick?: (image: GalleryImage) => void
 }
 
-export function ImageGallery({ images, columns = { mobile: 1, tablet: 2, desktop: 3 } }: ImageGalleryProps) {
+export function ImageGallery({ images, columns = { mobile: 1, tablet: 2, desktop: 3 }, onImageClick }: ImageGalleryProps) {
   const [selectedImage, setSelectedImage] = useState<GalleryImage | null>(null)
   const [isZoomed, setIsZoomed] = useState(false)
   const [activeFilter, setActiveFilter] = useState<string>("all")
@@ -31,6 +32,10 @@ export function ImageGallery({ images, columns = { mobile: 1, tablet: 2, desktop
   const filteredImages = activeFilter === "all" ? images : images.filter((img) => img.category === activeFilter)
 
   const handleImageClick = (image: GalleryImage) => {
+    if (onImageClick) {
+      onImageClick(image)
+      return
+    }
     setSelectedImage(image)
     setCurrentImageIndex(0) // Empezar siempre por la primera (portada)
     setIsZoomed(false)

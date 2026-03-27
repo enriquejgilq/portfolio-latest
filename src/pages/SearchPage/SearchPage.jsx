@@ -7,6 +7,17 @@ import Tabs from "@mui/material/Tabs";
 import Tab from "@mui/material/Tab";
 import Divider from "@mui/material/Divider";
 import { useLocalStorageState } from "@toolpad/core/useLocalStorageState";
+import {
+  Drawer,
+  Typography,
+  Button,
+  IconButton,
+  useMediaQuery,
+  useTheme,
+} from "@mui/material";
+import { Close } from "@mui/icons-material";
+import ArrowBackIosIcon from "@mui/icons-material/ArrowBackIos";
+import ArrowForwardIosIcon from "@mui/icons-material/ArrowForwardIos";
 
 import AllResult from "../../components/AllResults/AllResult";
 import Paginator from "../../components/Paginator/Paginator";
@@ -43,6 +54,13 @@ export const SearchPage = () => {
     false,
   );
 
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
+  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+  const [drawerContent, setDrawerContent] = useState(null);
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const [allProjectsData, setAllProjectsData] = useState([]);
+
   const host = import.meta.env.VITE_HOST;
 
   const handleSearch = () => {
@@ -60,6 +78,36 @@ export const SearchPage = () => {
 
   const handleChange = (event, newValue) => {
     setPage(newValue);
+  };
+
+  const handleImageClickForDrawer = (image) => {
+    const project = allResultsData.find((p) => p._id === image.id);
+    if (project) {
+      setDrawerContent(project);
+      const index = allResultsData.findIndex((p) => p._id === image.id);
+      setCurrentIndex(index);
+      setIsDrawerOpen(true);
+    }
+  };
+
+  const handleCloseDrawer = () => {
+    setIsDrawerOpen(false);
+  };
+
+  const goToPreviousItem = () => {
+    if (currentIndex > 0) {
+      const nextIndex = currentIndex - 1;
+      setCurrentIndex(nextIndex);
+      setDrawerContent(allResultsData[nextIndex]);
+    }
+  };
+
+  const goToNextItem = () => {
+    if (currentIndex < allResultsData.length - 1) {
+      const nextIndex = currentIndex + 1;
+      setCurrentIndex(nextIndex);
+      setDrawerContent(allResultsData[nextIndex]);
+    }
   };
 
   const handleChangetext = (event) => {
@@ -85,14 +133,28 @@ export const SearchPage = () => {
           </div>
         );
       case "2":
-        return <Allprojects data={allResultsData} />;
-      case "3":
-        const galleryImages = allResultsData.map((project) => ({
+        const projectsImages = allResultsData.map((project) => ({
           id: project._id,
           src: project.images[0],
           alt: project.description || project.name,
           title: project.name,
-          category: project.name || "Sin Nombre",
+          category: project.technology?.[0] || "General",
+          projectImages: project.images,
+        }));
+        return (
+          <ImageGallery
+            images={projectsImages}
+            columns={{ mobile: 1, tablet: 2, desktop: 3 }}
+            onImageClick={handleImageClickForDrawer}
+          />
+        );
+      case "3":
+        const galleryImages = allProjectsData.map((project) => ({
+          id: project._id,
+          src: project.images[0],
+          alt: project.description || project.name,
+          title: project.name,
+          category: project.technology?.[0] || "General",
           projectImages: project.images,
         }));
         return (
@@ -168,6 +230,18 @@ export const SearchPage = () => {
     }
   }
 
+  async function fetchAllProjects() {
+    try {
+      const endpoint = "getAllPortfolio";
+      const response = await fetch(`${host}/api/${endpoint}`);
+      if (!response.ok) throw new Error("Error fetching all projects");
+      const data = await response.json();
+      setAllProjectsData(data.results || []);
+    } catch (error) {
+      console.error("Error fetching all projects:", error);
+    }
+  }
+
   /*
   const images = [
     {
@@ -237,6 +311,7 @@ export const SearchPage = () => {
   */
 
   useEffect(() => {
+    fetchAllProjects();
     if (!searchTerm) return;
     fetchSearchPortfolio(searchTerm, 1, 10);
     setSearchQuery(searchTerm);
@@ -421,6 +496,74 @@ export const SearchPage = () => {
           </>
         )}
       </div>
+
+      <Drawer
+        anchor={isMobile ? "bottom" : "right"}
+        open={isDrawerOpen}
+        onClose={handleCloseDrawer}
+        sx={{
+          width: isMobile ? "100%" : 420,
+          flexShrink: 0,
+          "& .MuiDrawer-paper": {
+            width: isMobile ? "100%" : 420,
+            boxSizing: "border-box",
+            height: isMobile ? "auto" : "100%",
+            overflow: "auto",
+          },
+        }}
+      >
+        <div style={{ padding: "20px", width: "100%" }}>
+          <div className="flex justify-between items-center mb-4">
+            <Typography variant="h6">Detalles del proyecto</Typography>
+            <div className="flex items-center">
+              {!isMobile && (
+                <>
+                  <IconButton
+                    className="focus:outline-none focus:ring-0"
+                    disableRipple
+                    onClick={goToPreviousItem}
+                    disabled={currentIndex === 0}
+                  >
+                    <ArrowBackIosIcon fontSize="medium" />
+                  </IconButton>
+                  <IconButton
+                    className="focus:outline-none focus:ring-0"
+                    disableRipple
+                    onClick={goToNextItem}
+                    disabled={currentIndex === allResultsData.length - 1}
+                  >
+                    <ArrowForwardIosIcon fontSize="medium" />
+                  </IconButton>
+                </>
+              )}
+              <IconButton onClick={handleCloseDrawer}>
+                <Close />
+              </IconButton>
+            </div>
+          </div>
+          <Typography variant="h5" sx={{ fontWeight: "bold", mb: 2 }}>
+            {drawerContent?.name}
+          </Typography>
+          {drawerContent?.images?.[0] && (
+            <img
+              src={drawerContent.images[0]}
+              alt={drawerContent.name}
+              style={{ width: "100%", borderRadius: "8px", marginBottom: "16px" }}
+            />
+          )}
+          <Typography variant="body1" sx={{ textAlign: "justify" }}>
+            {drawerContent?.description}
+          </Typography>
+          <Button
+            variant="contained"
+            fullWidth
+            onClick={handleCloseDrawer}
+            sx={{ marginTop: 4, borderRadius: "20px" }}
+          >
+            Cerrar
+          </Button>
+        </div>
+      </Drawer>
     </div>
   );
 };
