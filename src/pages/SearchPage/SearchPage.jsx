@@ -138,7 +138,7 @@ export const SearchPage = () => {
           src: project.images[0],
           alt: project.description || project.name,
           title: project.name,
-          category: project.technology?.[0] || "General",
+          categories: project.technology && project.technology.length > 0 ? project.technology : ["General"],
           projectImages: project.images,
         }));
         return (
@@ -154,7 +154,7 @@ export const SearchPage = () => {
           src: project.images[0],
           alt: project.description || project.name,
           title: project.name,
-          category: project.technology?.[0] || "General",
+          categories: project.technology && project.technology.length > 0 ? project.technology : ["General"],
           projectImages: project.images,
         }));
         return (

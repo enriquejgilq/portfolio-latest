@@ -7,7 +7,7 @@ export interface GalleryImage {
   src: string
   alt: string
   title?: string
-  category: string
+  categories: string[]
   projectImages?: string[]
 }
 
@@ -27,9 +27,16 @@ export function ImageGallery({ images, columns = { mobile: 1, tablet: 2, desktop
   const [activeFilter, setActiveFilter] = useState<string>("all")
   const [currentImageIndex, setCurrentImageIndex] = useState(0)
 
-  const categories = ["all", ...Array.from(new Set(images.map((img) => img.category)))]
+  // Normalize and collect all unique categories
+  const categories = ["all", ...Array.from(new Set(images.flatMap((img) => 
+    img.categories.map(c => c.toLowerCase().trim())
+  )))]
   
-  const filteredImages = activeFilter === "all" ? images : images.filter((img) => img.category === activeFilter)
+  const filteredImages = activeFilter === "all" 
+    ? images 
+    : images.filter((img) => 
+        img.categories.some(c => c.toLowerCase().trim() === activeFilter.toLowerCase().trim())
+      )
 
   const handleImageClick = (image: GalleryImage) => {
     if (onImageClick) {
@@ -76,7 +83,7 @@ export function ImageGallery({ images, columns = { mobile: 1, tablet: 2, desktop
             className={cn(
               "px-4 py-2 rounded-full text-xs md:text-sm font-medium transition-all duration-300 whitespace-nowrap",
               "hover:scale-105 active:scale-95 flex-shrink-0",
-              activeFilter === category
+              activeFilter.toLowerCase() === category.toLowerCase()
                 ? "bg-primary text-primary-foreground shadow-lg"
                 : "bg-muted text-muted-foreground hover:bg-muted/80",
             )}
