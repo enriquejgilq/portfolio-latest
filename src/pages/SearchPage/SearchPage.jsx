@@ -35,7 +35,7 @@ import { driver } from "driver.js";
 import "driver.js/dist/driver.css";
 import { ImageGallery } from "../../components/Gallery/ImageGallery";
 
-export const SearchPage = () => {
+export const SearchPage = ({ username }) => {
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -73,7 +73,7 @@ export const SearchPage = () => {
   };
 
   const onHome = () => {
-    navigate(`/`);
+    navigate(`/${username}`);
   };
 
   const handleChange = (event, newValue) => {
@@ -210,7 +210,7 @@ export const SearchPage = () => {
       const response = await fetch(
         `${host}/api/${endpoint}?query=${encodeURIComponent(
           query,
-        )}&page=${page}&limit=${limit}`,
+        )}&page=${page}&limit=${limit}&username=${username}`,
       );
 
       if (!response.ok) {
@@ -233,7 +233,7 @@ export const SearchPage = () => {
   async function fetchAllProjects() {
     try {
       const endpoint = "getAllPortfolio";
-      const response = await fetch(`${host}/api/${endpoint}`);
+      const response = await fetch(`${host}/api/${endpoint}?username=${username}`);
       if (!response.ok) throw new Error("Error fetching all projects");
       const data = await response.json();
       setAllProjectsData(data.results || []);

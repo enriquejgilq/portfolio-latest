@@ -24,7 +24,7 @@ import "driver.js/dist/driver.css";
 
 import img from "../../assets/Egv3.png";
 import { ImageGallery } from "../../components/Gallery/ImageGallery";
-export default function Component() {
+export default function HomePage({ username }) {
   const navigate = useNavigate();
  const host = import.meta.env.VITE_HOST;
  const endpoint = "visits";
@@ -40,7 +40,7 @@ export default function Component() {
     const trimmedQuery = searchQuery.trim();
     e.preventDefault();
     if (!trimmedQuery) return;
-    navigate(`/search?query=${searchQuery}`);
+    navigate(`/${username}?query=${searchQuery}`);
     handleSelection(null, searchQuery);
   };
 
@@ -54,7 +54,7 @@ export default function Component() {
       localStorage.setItem("searchHistory", JSON.stringify(updatedHistory));
     }
 
-    navigate(`/search?query=${newValue}`);
+    navigate(`/${username}?query=${newValue}`);
   };
 
   const options = [...searchHistory, ...technologies.map((tech) => tech.title)];
@@ -66,7 +66,7 @@ export default function Component() {
     console.log("I'm feeling lucky!");
   };
   const searchFromTendency = (tendency) => {
-    navigate(`/search?query=${tendency}`);
+    navigate(`/${username}?query=${tendency}`);
   };
  
   const title = ["P", "o", "r", "t", "a", "f", "o", "l", "i", "o"];
@@ -154,7 +154,8 @@ export default function Component() {
   useEffect(() => {
     const fetchVisits = async () => {
       try {
-        const response = await fetch( `${host}/api/${endpoint}` );
+        // Agregamos ?username para que se contabilicen las visitas al perfil del usuario
+        const response = await fetch( `${host}/api/${endpoint}?username=${username}` );
         const data = await response.json();
         setVisits(data.visits);
       } catch (err) {
