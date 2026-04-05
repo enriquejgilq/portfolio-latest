@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useParams, useLocation } from "react-router-dom";
 import GoogleLayout from "../../layouts/GoogleLayout/GoogleLayout";
+import FacebookLayout from "../../layouts/FacebookLayout/FacebookLayout";
 
 // Si luego quieres agregar layouts, los importarías aquí
 // import TwitterLayout from "../../layouts/TwitterLayout/TwitterLayout";
@@ -26,7 +27,7 @@ export default function PortfolioRouter() {
         
         // Supongamos que la API devuelve { layout: 'Google' } u otra prop
         // Asignamos 'Google' como valor por defecto si no viene.
-        setLayoutStyle(data.layout || "Google");
+        setLayoutStyle(data.layout_type || "Google");
       } catch (err) {
         console.error("Error fetching user layout:", err);
         setError(err.message);
@@ -67,8 +68,7 @@ export default function PortfolioRouter() {
       // return <TwitterLayout username={username} />;
       return <div className="p-10">Borrador: Layout Twitter/X para {username}</div>;
     case "Facebook":
-      // return <FacebookLayout username={username} />;
-      return <div className="p-10">Borrador: Layout Facebook para {username}</div>;
+      return <FacebookLayout username={username} />;
     case "Instagram":
       // return <InstagramLayout username={username} />;
       return <div className="p-10">Borrador: Layout Instagram para {username}</div>;

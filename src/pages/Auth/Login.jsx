@@ -22,15 +22,16 @@ export default function Login() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ username, password }),
+        credentials: 'include'
       });
 
       if (!response.ok) throw new Error("Credenciales inválidas o error de conexión.");
       
       const data = await response.json();
-      // Guardamos el token que viene del backend en localStorage
-      if (data.token) {
-        localStorage.setItem("portfolio_token", data.token);
-      }
+      
+      // Guardamos el username para tenerlo "a la mano" en todo el dashboard
+      // Si el back no lo devuelve en 'data.username', usamos el que ingresó el usuario
+      localStorage.setItem("portfolio_username", data.username || username);
 
       navigate("/dashboard");
     } catch (err) {

@@ -1,10 +1,10 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { FolderGit2, Edit2, Trash2, Eye, Plus, X, Globe, Github, AlertTriangle, Save } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import { useProjects } from "../../../hooks/useProjects.jsx";
 
 export default function ProjectsView() {
-  const [projects, setProjects] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const { projects, loading, addProjects, updateProject, deleteProject } = useProjects();
   
   // Modals state
   const [selectedProject, setSelectedProject] = useState(null); 
@@ -13,77 +13,48 @@ export default function ProjectsView() {
   const [isCreatingProject, setIsCreatingProject] = useState(false);
 
   // Forms state
-  const [editForm, setEditForm] = useState({ name: "", description: "", technology: "", demoUrl: "", repoUrl: "" });
-  const [createForm, setCreateForm] = useState({ name: "", description: "", technology: "", demoUrl: "", repoUrl: "" });
+  const [editForm, setEditForm] = useState({ name: "", description: "", technology: [""], images: [""], demoUrl: "", repoUrl: "" });
+  const [createForm, setCreateForm] = useState({ name: "", description: "", technology: [""], images: [""], demoUrl: "", repoUrl: "" });
   const [isSubmiting, setIsSubmiting] = useState(false);
-
-  const host = import.meta.env.VITE_HOST || "";
-
-  useEffect(() => {
-    fetchProjects();
-  }, [host]);
-
-  const fetchProjects = async () => {
-    try {
-      const res = await fetch(`${host}/api/getAllPortfolio`); 
-      const data = await res.json();
-      setProjects(data.results || []);
-    } catch (err) {
-      console.error(err);
-    } finally {
-      setLoading(false);
-    }
-  };
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
   // --- Handlers de Creación ---
   const handleOpenCreate = () => {
-    setCreateForm({ name: "", description: "", technology: "", demoUrl: "", repoUrl: "" });
+    setCreateForm({ name: "", description: "", technology: [""], images: [""], demoUrl: "", repoUrl: "" });
     setIsCreatingProject(true);
   };
 
   const handleCreateSubmit = async (e) => {
     e.preventDefault();
     setIsSubmiting(true);
-    try {
-      const newBody = {
-        ...createForm,
-        technology: createForm.technology.split(",").map(t => t.trim()).filter(Boolean)
-      };
-      
-      const res = await fetch(`${host}/api/portfolio`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(newBody)
-      });
-      
-      if (!res.ok) throw new Error("Fallo al crear proyecto");
-      
-      const data = await res.json();
-      
-      // Actualizamos listado asumiendo que el back retorna el objeto insertado en `data.project` o similar, 
-      // si no retorna nada, hacemos un refetch.
-      if (data && (data.project || data.result)) {
-        setProjects([data.project || data.result, ...projects]);
-      } else {
-        await fetchProjects();
-      }
+    
+    const newBody = {
+      ...createForm,
+      technology: createForm.technology.filter(Boolean),
+      images: createForm.images.filter(Boolean)
+    };
+    
+    const result = await addProjects(newBody);
+    if (result.success) {
       setIsCreatingProject(false);
-    } catch (err) {
-      console.error(err);
-      alert("Error simulado o falló conexión al backend al intentar Crear.");
-    } finally {
-      setIsSubmiting(false);
+    } else {
+      alert("Error al crear: " + result.error);
     }
+    setIsSubmiting(false);
   };
 
   // --- Handlers de Edición ---
   const handleOpenEdit = (proj) => {
+    const tech = Array.isArray(proj.technology) ? proj.technology : [proj.technology || ""];
+    const imgs = Array.isArray(proj.images) ? proj.images : [proj.images || ""];
+    
     setEditForm({
       name: proj.name || "",
       description: proj.description || "",
-      technology: proj.technology ? proj.technology.join(", ") : "",
-      demoUrl: proj.demoUrl || "",
-      repoUrl: proj.repoUrl || ""
+      technology: tech.length > 0 ? tech : [""],
+      images: imgs.length > 0 ? imgs : [""],
+      demoUrl: proj.demoUrl || (proj.works?.[1] || ""),
+      repoUrl: proj.repoUrl || (proj.works?.[0] || "")
     });
     setEditingProject(proj);
   };
@@ -91,45 +62,40 @@ export default function ProjectsView() {
   const handleEditSubmit = async (e) => {
     e.preventDefault();
     setIsSubmiting(true);
-    try {
-      const updatedBody = {
-        ...editForm,
-        technology: editForm.technology.split(",").map(t => t.trim()).filter(Boolean)
-      };
-      
-      const res = await fetch(`${host}/api/portfolio/${editingProject._id}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(updatedBody)
-      });
-      
-      if (!res.ok) throw new Error("Fallo al actualizar");
-
-      setProjects(projects.map(p => p._id === editingProject._id ? { ...p, ...updatedBody } : p));
+    
+    const updatedBody = {
+      ...editForm,
+      technology: editForm.technology.filter(Boolean),
+      images: editForm.images.filter(Boolean)
+    };
+    
+    const result = await updateProject(editingProject._id, updatedBody);
+    if (result.success) {
       setEditingProject(null);
-    } catch (err) {
-      console.error(err);
-      alert("Error falló conexión al backend al intentar Editar.");
-    } finally {
-      setIsSubmiting(false);
+    } else {
+      alert("Error al editar: " + result.error);
     }
+    setIsSubmiting(false);
   };
 
   // --- Handlers de Eliminación ---
   const handleDeleteConfirm = async () => {
     setIsSubmiting(true);
-    try {
-      const res = await fetch(`${host}/api/portfolio/${deletingProject._id}`, { method: "DELETE" });
-      if (!res.ok) throw new Error("Fallo al eliminar");
-
-      setProjects(projects.filter(p => p._id !== deletingProject._id));
+    const result = await deleteProject(deletingProject._id);
+    if (result.success) {
       setDeletingProject(null);
-    } catch (err) {
-      console.error(err);
-      alert("Error: falló conexión al backend al intentar Eliminar.");
-    } finally {
-      setIsSubmiting(false);
+    } else {
+      alert("Error al eliminar: " + result.error);
     }
+    setIsSubmiting(false);
+  };
+
+  // --- Lógica de Búsqueda ---
+  const filteredJobs = []; // Placeholder si fuera necesario, pero ProjectsView usa projects directamente
+  
+  const handleCloseDetails = () => {
+    setSelectedProject(null);
+    setCurrentImageIndex(0);
   };
 
   return (
@@ -245,17 +211,62 @@ export default function ProjectsView() {
                   <textarea rows={3} value={createForm.description} onChange={e => setCreateForm({...createForm, description: e.target.value})} className="w-full border-gray-300 rounded-xl focus:ring-blue-500 focus:border-blue-500 bg-white p-2 border" required />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Tecnologías (Variables separadas por coma)</label>
-                  <input type="text" placeholder="React, Node.js, Mongo..." value={createForm.technology} onChange={e => setCreateForm({...createForm, technology: e.target.value})} className="w-full border-gray-300 rounded-xl focus:ring-blue-500 focus:border-blue-500 bg-white p-2 border" />
+                  <div className="flex items-center justify-between mb-2">
+                    <label className="block text-sm font-medium text-gray-700">Imágenes (URLs)</label>
+                    <button type="button" onClick={() => setCreateForm({...createForm, images: [...createForm.images, ""]})} className="text-xs bg-blue-50 text-blue-600 px-2 py-1 rounded-lg hover:bg-blue-100 flex items-center">
+                      <Plus className="w-3 h-3 mr-1" /> Añadir Imagen
+                    </button>
+                  </div>
+                  <div className="space-y-2">
+                    {createForm.images.map((img, idx) => (
+                      <div key={idx} className="flex gap-2">
+                        <input type="text" placeholder="https://..." value={img} onChange={e => {
+                          const newImgs = [...createForm.images];
+                          newImgs[idx] = e.target.value;
+                          setCreateForm({...createForm, images: newImgs});
+                        }} className="w-full border-gray-300 rounded-xl focus:ring-blue-500 focus:border-blue-500 bg-white p-2 border text-sm" />
+                        {createForm.images.length > 1 && (
+                          <button type="button" onClick={() => setCreateForm({...createForm, images: createForm.images.filter((_, i) => i !== idx)})} className="p-2 text-red-400 hover:bg-red-50 rounded-lg">
+                            <X className="w-4 h-4" />
+                          </button>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                <div>
+                  <div className="flex items-center justify-between mb-2">
+                    <label className="block text-sm font-medium text-gray-700">Tecnologías</label>
+                    <button type="button" onClick={() => setCreateForm({...createForm, technology: [...createForm.technology, ""]})} className="text-xs bg-blue-50 text-blue-600 px-2 py-1 rounded-lg hover:bg-blue-100 flex items-center">
+                      <Plus className="w-3 h-3 mr-1" /> Añadir Tech
+                    </button>
+                  </div>
+                  <div className="space-y-2">
+                    {createForm.technology.map((tech, idx) => (
+                      <div key={idx} className="flex gap-2">
+                        <input type="text" placeholder="Ej: React" value={tech} onChange={e => {
+                          const newTech = [...createForm.technology];
+                          newTech[idx] = e.target.value;
+                          setCreateForm({...createForm, technology: newTech});
+                        }} className="w-full border-gray-300 rounded-xl focus:ring-blue-500 focus:border-blue-500 bg-white p-2 border text-sm" />
+                        {createForm.technology.length > 1 && (
+                          <button type="button" onClick={() => setCreateForm({...createForm, technology: createForm.technology.filter((_, i) => i !== idx)})} className="p-2 text-red-400 hover:bg-red-50 rounded-lg">
+                            <X className="w-4 h-4" />
+                          </button>
+                        )}
+                      </div>
+                    ))}
+                  </div>
                 </div>
                 <div className="flex gap-4">
                    <div className="w-1/2">
                     <label className="block text-sm font-medium text-gray-700 mb-1">URL Demo</label>
-                    <input type="url" placeholder="https://" value={createForm.demoUrl} onChange={e => setCreateForm({...createForm, demoUrl: e.target.value})} className="w-full border-gray-300 rounded-xl focus:ring-blue-500 focus:border-blue-500 bg-white p-2 border" />
+                    <input type="text" placeholder="https://" value={createForm.demoUrl} onChange={e => setCreateForm({...createForm, demoUrl: e.target.value})} className="w-full border-gray-300 rounded-xl focus:ring-blue-500 focus:border-blue-500 bg-white p-2 border" />
                    </div>
                    <div className="w-1/2">
                     <label className="block text-sm font-medium text-gray-700 mb-1">URL Repo</label>
-                    <input type="url" placeholder="https://" value={createForm.repoUrl} onChange={e => setCreateForm({...createForm, repoUrl: e.target.value})} className="w-full border-gray-300 rounded-xl focus:ring-blue-500 focus:border-blue-500 bg-white p-2 border" />
+                    <input type="text" placeholder="https://" value={createForm.repoUrl} onChange={e => setCreateForm({...createForm, repoUrl: e.target.value})} className="w-full border-gray-300 rounded-xl focus:ring-blue-500 focus:border-blue-500 bg-white p-2 border" />
                    </div>
                 </div>
 
@@ -285,8 +296,8 @@ export default function ProjectsView() {
             >
               <div className="flex items-center justify-between p-6 bg-slate-50 border-b border-gray-100">
                 <h3 className="text-xl font-bold flex items-center text-gray-800">
-                  <Edit2 className="w-5 h-5 mr-2 text-amber-500" />
-                  Editar Proyecto
+                   <Edit2 className="w-5 h-5 mr-2 text-amber-500" />
+                   Editar Proyecto
                 </h3>
                 <button onClick={() => setEditingProject(null)} className="p-1 text-gray-400 hover:text-gray-700 rounded-full transition-colors">
                   <X className="w-6 h-6" />
@@ -303,17 +314,62 @@ export default function ProjectsView() {
                   <textarea rows={3} value={editForm.description} onChange={e => setEditForm({...editForm, description: e.target.value})} className="w-full border-gray-300 rounded-xl focus:ring-blue-500 focus:border-blue-500 bg-white p-2 border" required />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Tecnologías (Variables separadas por coma)</label>
-                  <input type="text" placeholder="React, Node.js, Mongo..." value={editForm.technology} onChange={e => setEditForm({...editForm, technology: e.target.value})} className="w-full border-gray-300 rounded-xl focus:ring-blue-500 focus:border-blue-500 bg-white p-2 border" />
+                  <div className="flex items-center justify-between mb-2">
+                    <label className="block text-sm font-medium text-gray-700">Imágenes (URLs)</label>
+                    <button type="button" onClick={() => setEditForm({...editForm, images: [...editForm.images, ""]})} className="text-xs bg-blue-50 text-blue-600 px-2 py-1 rounded-lg hover:bg-blue-100 flex items-center">
+                      <Plus className="w-3 h-3 mr-1" /> Añadir Imagen
+                    </button>
+                  </div>
+                  <div className="space-y-2">
+                    {editForm.images.map((img, idx) => (
+                      <div key={idx} className="flex gap-2">
+                        <input type="text" value={img} onChange={e => {
+                          const newImgs = [...editForm.images];
+                          newImgs[idx] = e.target.value;
+                          setEditForm({...editForm, images: newImgs});
+                        }} className="w-full border-gray-300 rounded-xl focus:ring-blue-500 focus:border-blue-500 bg-white p-2 border text-sm" />
+                        {editForm.images.length > 1 && (
+                          <button type="button" onClick={() => setEditForm({...editForm, images: editForm.images.filter((_, i) => i !== idx)})} className="p-2 text-red-400 hover:bg-red-50 rounded-lg">
+                            <X className="w-4 h-4" />
+                          </button>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                <div>
+                  <div className="flex items-center justify-between mb-2">
+                    <label className="block text-sm font-medium text-gray-700">Tecnologías</label>
+                    <button type="button" onClick={() => setEditForm({...editForm, technology: [...editForm.technology, ""]})} className="text-xs bg-blue-50 text-blue-600 px-2 py-1 rounded-lg hover:bg-blue-100 flex items-center">
+                      <Plus className="w-3 h-3 mr-1" /> Añadir Tech
+                    </button>
+                  </div>
+                  <div className="space-y-2">
+                    {editForm.technology.map((tech, idx) => (
+                      <div key={idx} className="flex gap-2">
+                        <input type="text" value={tech} onChange={e => {
+                          const newTech = [...editForm.technology];
+                          newTech[idx] = e.target.value;
+                          setEditForm({...editForm, technology: newTech});
+                        }} className="w-full border-gray-300 rounded-xl focus:ring-blue-500 focus:border-blue-500 bg-white p-2 border text-sm" />
+                        {editForm.technology.length > 1 && (
+                          <button type="button" onClick={() => setEditForm({...editForm, technology: editForm.technology.filter((_, i) => i !== idx)})} className="p-2 text-red-400 hover:bg-red-50 rounded-lg">
+                            <X className="w-4 h-4" />
+                          </button>
+                        )}
+                      </div>
+                    ))}
+                  </div>
                 </div>
                 <div className="flex gap-4">
                    <div className="w-1/2">
                     <label className="block text-sm font-medium text-gray-700 mb-1">URL Demo</label>
-                    <input type="url" placeholder="https://" value={editForm.demoUrl} onChange={e => setEditForm({...editForm, demoUrl: e.target.value})} className="w-full border-gray-300 rounded-xl focus:ring-blue-500 focus:border-blue-500 bg-white p-2 border" />
+                    <input type="text" placeholder="https://" value={editForm.demoUrl} onChange={e => setEditForm({...editForm, demoUrl: e.target.value})} className="w-full border-gray-300 rounded-xl focus:ring-blue-500 focus:border-blue-500 bg-white p-2 border" />
                    </div>
                    <div className="w-1/2">
                     <label className="block text-sm font-medium text-gray-700 mb-1">URL Repo</label>
-                    <input type="url" placeholder="https://" value={editForm.repoUrl} onChange={e => setEditForm({...editForm, repoUrl: e.target.value})} className="w-full border-gray-300 rounded-xl focus:ring-blue-500 focus:border-blue-500 bg-white p-2 border" />
+                    <input type="text" placeholder="https://" value={editForm.repoUrl} onChange={e => setEditForm({...editForm, repoUrl: e.target.value})} className="w-full border-gray-300 rounded-xl focus:ring-blue-500 focus:border-blue-500 bg-white p-2 border" />
                    </div>
                 </div>
 
@@ -343,31 +399,95 @@ export default function ProjectsView() {
             >
               <div className="flex items-center justify-between p-6 border-b border-gray-100">
                 <h3 className="text-2xl font-bold text-gray-800">Detalles del Proyecto</h3>
-                <button onClick={() => setSelectedProject(null)} className="p-2 text-gray-400 hover:text-gray-700 bg-gray-50 hover:bg-gray-100 rounded-full transition-colors">
+                <button onClick={handleCloseDetails} className="p-2 text-gray-400 hover:text-gray-700 bg-gray-50 hover:bg-gray-100 rounded-full transition-colors">
                   <X className="w-5 h-5" />
                 </button>
               </div>
 
               <div className="p-6 overflow-y-auto custom-scrollbar">
-                {selectedProject.images?.[0] && (
-                  <div className="w-full h-64 mb-6 rounded-xl overflow-hidden border border-gray-100 shadow-sm relative group">
-                    <img src={selectedProject.images[0]} alt={selectedProject.name} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
+                {selectedProject.images?.length > 0 && (
+                  <div className="relative mb-8 group">
+                    <div className="relative h-72 rounded-2xl overflow-hidden shadow-lg border border-gray-100">
+                      <AnimatePresence mode="wait">
+                        <motion.img
+                          key={currentImageIndex}
+                          src={selectedProject.images[currentImageIndex]}
+                          initial={{ opacity: 0, x: 20 }}
+                          animate={{ opacity: 1, x: 0 }}
+                          exit={{ opacity: 0, x: -20 }}
+                          className="w-full h-full object-cover"
+                        />
+                      </AnimatePresence>
+                      
+                      {selectedProject.images.length > 1 && (
+                        <>
+                          <button 
+                            onClick={() => setCurrentImageIndex(prev => (prev === 0 ? selectedProject.images.length - 1 : prev - 1))}
+                            className="absolute left-3 top-1/2 -translate-y-1/2 p-2 bg-white/80 backdrop-blur-sm rounded-full shadow-md text-gray-800 hover:bg-white transition-all opacity-0 group-hover:opacity-100"
+                          >
+                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 19l-7-7 7-7" /></svg>
+                          </button>
+                          <button 
+                            onClick={() => setCurrentImageIndex(prev => (prev === selectedProject.images.length - 1 ? 0 : prev + 1))}
+                            className="absolute right-3 top-1/2 -translate-y-1/2 p-2 bg-white/80 backdrop-blur-sm rounded-full shadow-md text-gray-800 hover:bg-white transition-all opacity-0 group-hover:opacity-100"
+                          >
+                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7" /></svg>
+                          </button>
+                        </>
+                      )}
+                    </div>
+                    
+                    {selectedProject.images.length > 1 && (
+                      <div className="flex justify-center mt-3 gap-1.5">
+                        {selectedProject.images.map((_, i) => (
+                           <button 
+                            key={i} 
+                            onClick={() => setCurrentImageIndex(i)}
+                            className={`h-1.5 rounded-full transition-all ${i === currentImageIndex ? "w-6 bg-blue-600" : "w-1.5 bg-gray-300 hover:bg-gray-400"}`}
+                           />
+                        ))}
+                      </div>
+                    )}
                   </div>
                 )}
                 
                 <h4 className="text-2xl font-black tracking-tight text-gray-900 mb-2">{selectedProject.name}</h4>
-                <p className="text-gray-600 mb-6 leading-relaxed">{selectedProject.description}</p>
+                <p className="text-gray-600 mb-6 leading-relaxed bg-gray-50 p-4 rounded-xl border border-gray-100 italic">{selectedProject.description}</p>
 
                 {selectedProject.technology?.length > 0 && (
                   <div className="mb-6">
-                    <h5 className="text-sm font-bold text-gray-900 uppercase tracking-wider mb-3">Tecnologías</h5>
+                    <h5 className="text-sm font-bold text-gray-900 uppercase tracking-wider mb-3 flex items-center">
+                       <span className="w-6 h-[2px] bg-blue-500 mr-2"></span>
+                       Tecnologías
+                    </h5>
                     <div className="flex flex-wrap gap-2">
                       {selectedProject.technology.map((tech, idx) => (
-                        <span key={idx} className="px-3 py-1 bg-indigo-50 text-indigo-700 rounded-md text-sm font-medium border border-indigo-100">{tech}</span>
+                        <span key={idx} className="px-3 py-1 bg-white text-blue-700 rounded-lg text-sm font-semibold border border-blue-100 shadow-sm">{tech}</span>
                       ))}
                     </div>
                   </div>
                 )}
+
+                <div className="grid grid-cols-2 gap-4">
+                  {(selectedProject.works?.[1] || selectedProject.demoUrl) && (
+                    <a 
+                      href={selectedProject.works?.[1] || selectedProject.demoUrl} 
+                      target="_blank" rel="noopener noreferrer"
+                      className="flex items-center justify-center py-3 bg-blue-600 text-white rounded-xl font-bold hover:bg-blue-700 transition-colors shadow-lg shadow-blue-200"
+                    >
+                      <Globe className="w-4 h-4 mr-2" /> Demo en Vivo
+                    </a>
+                  )}
+                  {(selectedProject.works?.[0] || selectedProject.repoUrl) && (
+                    <a 
+                      href={selectedProject.works?.[0] || selectedProject.repoUrl} 
+                      target="_blank" rel="noopener noreferrer"
+                      className="flex items-center justify-center py-3 bg-gray-800 text-white rounded-xl font-bold hover:bg-gray-900 transition-colors shadow-lg shadow-gray-200"
+                    >
+                      <Github className="w-4 h-4 mr-2" /> Repositorio
+                    </a>
+                  )}
+                </div>
               </div>
             </motion.div>
           </motion.div>

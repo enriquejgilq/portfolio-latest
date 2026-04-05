@@ -1,10 +1,10 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Briefcase, Eye, Search, X, Calendar, Building2, Plus, Save, Edit2, Trash2, AlertTriangle } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import { useExperience } from "../../../hooks/useExperience.jsx";
 
 export default function JobsView() {
-  const [jobs, setJobs] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const { jobs, loading, addExperience, updateExperience, deleteExperience } = useExperience();
   
   // Modals state
   const [selectedJob, setSelectedJob] = useState(null); // Detalles
@@ -15,69 +15,40 @@ export default function JobsView() {
   const [isSubmiting, setIsSubmiting] = useState(false);
 
   // Forms state
-  const [createForm, setCreateForm] = useState({ role: "", company: "", startDate: "", endDate: "", description: "" });
-  const [editForm, setEditForm] = useState({ role: "", company: "", startDate: "", endDate: "", description: "" });
+  const [createForm, setCreateForm] = useState({ position: "", company: "", typePosition: "Full-time", location: "", startDate: "", endDate: "", description: [""] });
+  const [editForm, setEditForm] = useState({ position: "", company: "", typePosition: "Full-time", location: "", startDate: "", endDate: "", description: [""] });
 
   const [searchTerm, setSearchTerm] = useState("");
 
-  const host = import.meta.env.VITE_HOST || "";
-
-  useEffect(() => {
-    fetchJobs();
-  }, [host]);
-
-  const fetchJobs = async () => {
-    try {
-      const res = await fetch(`${host}/api/getAllExperience`);
-      const data = await res.json();
-      setJobs(data.results || []);
-    } catch (err) {
-      console.error(err);
-    } finally {
-      setLoading(false);
-    }
-  };
-
   // --- Handlers Creación Trabajo ---
   const handleOpenCreate = () => {
-    setCreateForm({ role: "", company: "", startDate: "", endDate: "", description: "" });
+    setCreateForm({ position: "", company: "", typePosition: "Full-time", location: "", startDate: "", endDate: "", description: [""] });
     setIsCreatingJob(true);
   };
 
   const handleCreateSubmit = async (e) => {
     e.preventDefault();
     setIsSubmiting(true);
-    try {
-      const res = await fetch(`${host}/api/experience`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(createForm)
-      });
-      if (!res.ok) throw new Error("Fallo al crear experiencia laboral.");
-      
-      const data = await res.json();
-      if (data && (data.job || data.result)) {
-        setJobs([data.job || data.result, ...jobs]);
-      } else {
-        await fetchJobs();
-      }
+    const result = await addExperience(createForm);
+    if (result.success) {
       setIsCreatingJob(false);
-    } catch (err) {
-      console.error(err);
-      alert("Error al intentar crear nueva experiencia. (Revisa consola)");
-    } finally {
-      setIsSubmiting(false);
+    } else {
+      alert("Error al crear: " + result.error);
     }
+    setIsSubmiting(false);
   };
 
   // --- Handlers Edición Trabajo ---
   const handleOpenEdit = (job) => {
+    const desc = Array.isArray(job.description) ? job.description : [job.description || ""];
     setEditForm({
-      role: job.role || job.title || "",
+      position: job.position || job.role || job.title || "",
       company: job.company || "",
-      startDate: job.startDate || "",
-      endDate: job.endDate || "",
-      description: job.description || ""
+      typePosition: job.typePosition || "Full-time",
+      location: job.location || "",
+      startDate: job.startDate ? job.startDate.split("T")[0] : "",
+      endDate: job.endDate ? job.endDate.split("T")[0] : "",
+      description: desc.length > 0 ? desc : [""]
     });
     setEditingJob(job);
   };
@@ -85,50 +56,33 @@ export default function JobsView() {
   const handleEditSubmit = async (e) => {
     e.preventDefault();
     setIsSubmiting(true);
-    try {
-      // Reemplaza endpoint según tu backend (ej. /api/experience/:id)
-      const res = await fetch(`${host}/api/experience/${editingJob._id}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(editForm)
-      });
-      
-      if (!res.ok) throw new Error("Fallo al actualizar el trabajo.");
-
-      setJobs(jobs.map(j => j._id === editingJob._id ? { ...j, ...editForm } : j));
+    const result = await updateExperience(editingJob._id, editForm);
+    if (result.success) {
       setEditingJob(null);
-    } catch (err) {
-      console.error(err);
-      alert("Error al intentar actualizar la experiencia.");
-    } finally {
-      setIsSubmiting(false);
+    } else {
+      alert("Error al actualizar: " + result.error);
     }
+    setIsSubmiting(false);
   };
 
   // --- Handlers Eliminación Trabajo ---
   const handleDeleteConfirm = async () => {
     setIsSubmiting(true);
-    try {
-      // Reemplaza endpoint según tu backend
-      const res = await fetch(`${host}/api/experience/${deletingJob._id}`, { method: "DELETE" });
-      if (!res.ok) throw new Error("Fallo al eliminar el trabajo.");
-
-      setJobs(jobs.filter(j => j._id !== deletingJob._id));
+    const result = await deleteExperience(deletingJob._id);
+    if (result.success) {
       setDeletingJob(null);
-    } catch (err) {
-      console.error(err);
-      alert("Error al intentar eliminar el trabajo.");
-    } finally {
-      setIsSubmiting(false);
+    } else {
+      alert("Error al eliminar: " + result.error);
     }
+    setIsSubmiting(false);
   };
 
   // --- Lógica de Búsqueda ---
   const filteredJobs = jobs.filter((job) => {
     const term = searchTerm.toLowerCase();
-    const roleMatch = (job.role || job.title || "").toLowerCase().includes(term);
+    const posMatch = (job.position || job.role || job.title || "").toLowerCase().includes(term);
     const compMatch = (job.company || "").toLowerCase().includes(term);
-    return roleMatch || compMatch;
+    return posMatch || compMatch;
   });
 
   return (
@@ -181,13 +135,13 @@ export default function JobsView() {
                         <Briefcase className="w-5 h-5" />
                       </div>
                       <div>
-                        <p className="font-semibold text-gray-800">{job.role || job.title || "Rol"}</p>
+                        <p className="font-semibold text-gray-800">{job.position || job.role || job.title || "Posición"}</p>
                         <p className="text-sm text-gray-500">{job.company || "Empresa"}</p>
                       </div>
                     </div>
                   </td>
                   <td className="p-4 text-sm text-gray-600">
-                    {job.startDate} - {job.endDate || "Presente"}
+                    {job.startDate ? job.startDate.split("T")[0] : "--"} - {job.endDate ? job.endDate.split("T")[0] : "Presente"}
                   </td>
                   <td className="p-4">
                     <div className="flex items-center justify-end space-x-1 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity">
@@ -231,27 +185,98 @@ export default function JobsView() {
               </div>
 
               <form onSubmit={handleCreateSubmit} className="p-6 overflow-y-auto space-y-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Puesto o Rol</label>
-                  <input type="text" placeholder="Ej: Frontend Developer" value={createForm.role} onChange={e => setCreateForm({...createForm, role: e.target.value})} className="w-full border-gray-300 rounded-xl focus:ring-blue-500 focus:border-blue-500 bg-white p-2 border" required />
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Puesto o Rol</label>
+                    <input type="text" placeholder="Ej: Senior Backend Developer" value={createForm.position} onChange={e => setCreateForm({...createForm, position: e.target.value})} className="w-full border-gray-300 rounded-xl focus:ring-blue-500 focus:border-blue-500 bg-white p-2 border text-sm" required />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Compañía</label>
+                    <input type="text" placeholder="Ej: Google" value={createForm.company} onChange={e => setCreateForm({...createForm, company: e.target.value})} className="w-full border-gray-300 rounded-xl focus:ring-blue-500 focus:border-blue-500 bg-white p-2 border text-sm" required />
+                  </div>
                 </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Compañía</label>
-                  <input type="text" placeholder="Ej: Google" value={createForm.company} onChange={e => setCreateForm({...createForm, company: e.target.value})} className="w-full border-gray-300 rounded-xl focus:ring-blue-500 focus:border-blue-500 bg-white p-2 border" required />
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Tipo de Jornada</label>
+                    <select value={createForm.typePosition} onChange={e => setCreateForm({...createForm, typePosition: e.target.value})} className="w-full border-gray-300 rounded-xl focus:ring-blue-500 focus:border-blue-500 bg-white p-2 border text-sm">
+                      <option value="Full-time">Full-time</option>
+                      <option value="Part-time">Part-time</option>
+                      <option value="Contract">Contract</option>
+                      <option value="Freelance">Freelance</option>
+                      <option value="Internship">Internship</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Ubicación</label>
+                    <input type="text" placeholder="Ej: Mountain View, CA" value={createForm.location} onChange={e => setCreateForm({...createForm, location: e.target.value})} className="w-full border-gray-300 rounded-xl focus:ring-blue-500 focus:border-blue-500 bg-white p-2 border text-sm" required />
+                  </div>
                 </div>
+
                 <div className="flex gap-4">
                    <div className="w-1/2">
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Fecha Inicio</label>
-                    <input type="text" placeholder="Ej: 2021" value={createForm.startDate} onChange={e => setCreateForm({...createForm, startDate: e.target.value})} className="w-full border-gray-300 rounded-xl focus:ring-blue-500 focus:border-blue-500 bg-white p-2 border" required />
+                    <label className="block text-sm font-medium text-gray-700 mb-1 flex items-center">
+                      <Calendar className="w-3 h-3 mr-1 text-blue-500" /> Fecha Inicio
+                    </label>
+                    <input 
+                      type="date" 
+                      value={createForm.startDate} 
+                      onChange={e => setCreateForm({...createForm, startDate: e.target.value})} 
+                      className="w-full border-gray-300 rounded-xl focus:ring-blue-500 focus:border-blue-500 bg-white p-2 border text-sm" 
+                      required 
+                    />
                    </div>
                    <div className="w-1/2">
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Fecha Fin</label>
-                    <input type="text" placeholder="Ej: Presente" value={createForm.endDate} onChange={e => setCreateForm({...createForm, endDate: e.target.value})} className="w-full border-gray-300 rounded-xl focus:ring-blue-500 focus:border-blue-500 bg-white p-2 border" />
+                    <label className="block text-sm font-medium text-gray-700 mb-1 flex items-center">
+                      <Calendar className="w-3 h-3 mr-1 text-blue-500" /> Fecha Fin
+                    </label>
+                    <input 
+                      type="date" 
+                      value={createForm.endDate} 
+                      onChange={e => setCreateForm({...createForm, endDate: e.target.value})} 
+                      className="w-full border-gray-300 rounded-xl focus:ring-blue-500 focus:border-blue-500 bg-white p-2 border text-sm" 
+                    />
+                    <p className="text-[10px] text-gray-400 mt-1">* Dejar vacío si es el trabajo actual</p>
                    </div>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Descripción y Logros</label>
-                  <textarea rows={4} placeholder="Describe tus aportes..." value={createForm.description} onChange={e => setCreateForm({...createForm, description: e.target.value})} className="w-full border-gray-300 rounded-xl focus:ring-blue-500 focus:border-blue-500 bg-white p-2 border" required />
+                  <div className="flex items-center justify-between mb-2">
+                    <label className="block text-sm font-medium text-gray-700">Descripción y Logros</label>
+                    <button 
+                      type="button" 
+                      onClick={() => setCreateForm({...createForm, description: [...createForm.description, ""]})}
+                      className="text-xs bg-blue-50 text-blue-600 px-2 py-1 rounded-lg border border-blue-100 hover:bg-blue-100 transition-colors flex items-center"
+                    >
+                      <Plus className="w-3 h-3 mr-1" /> Añadir Logro
+                    </button>
+                  </div>
+                  <div className="space-y-2">
+                    {createForm.description.map((item, idx) => (
+                      <div key={idx} className="flex items-center space-x-2">
+                        <input 
+                          type="text" 
+                          placeholder={`Logro #${idx + 1}`} 
+                          value={item} 
+                          onChange={e => {
+                            const newDesc = [...createForm.description];
+                            newDesc[idx] = e.target.value;
+                            setCreateForm({...createForm, description: newDesc});
+                          }} 
+                          className="w-full border-gray-300 rounded-xl focus:ring-blue-500 focus:border-blue-500 bg-white p-2 border text-sm" 
+                          required 
+                        />
+                        {createForm.description.length > 1 && (
+                          <button 
+                            type="button" 
+                            onClick={() => setCreateForm({...createForm, description: createForm.description.filter((_, i) => i !== idx)})}
+                            className="p-2 text-red-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                          >
+                            <X className="w-4 h-4" />
+                          </button>
+                        )}
+                      </div>
+                    ))}
+                  </div>
                 </div>
 
                 <div className="pt-6 mt-4 border-t border-gray-100 flex justify-end gap-3">
@@ -289,27 +314,96 @@ export default function JobsView() {
               </div>
 
               <form onSubmit={handleEditSubmit} className="p-6 overflow-y-auto space-y-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Puesto o Rol</label>
-                  <input type="text" value={editForm.role} onChange={e => setEditForm({...editForm, role: e.target.value})} className="w-full border-gray-300 rounded-xl focus:ring-blue-500 focus:border-blue-500 bg-white p-2 border" required />
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Puesto o Rol</label>
+                    <input type="text" value={editForm.position} onChange={e => setEditForm({...editForm, position: e.target.value})} className="w-full border-gray-300 rounded-xl focus:ring-blue-500 focus:border-blue-500 bg-white p-2 border text-sm" required />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Compañía</label>
+                    <input type="text" value={editForm.company} onChange={e => setEditForm({...editForm, company: e.target.value})} className="w-full border-gray-300 rounded-xl focus:ring-blue-500 focus:border-blue-500 bg-white p-2 border text-sm" required />
+                  </div>
                 </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Compañía</label>
-                  <input type="text" value={editForm.company} onChange={e => setEditForm({...editForm, company: e.target.value})} className="w-full border-gray-300 rounded-xl focus:ring-blue-500 focus:border-blue-500 bg-white p-2 border" required />
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Tipo de Jornada</label>
+                    <select value={editForm.typePosition} onChange={e => setEditForm({...editForm, typePosition: e.target.value})} className="w-full border-gray-300 rounded-xl focus:ring-blue-500 focus:border-blue-500 bg-white p-2 border text-sm">
+                      <option value="Full-time">Full-time</option>
+                      <option value="Part-time">Part-time</option>
+                      <option value="Contract">Contract</option>
+                      <option value="Freelance">Freelance</option>
+                      <option value="Internship">Internship</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Ubicación</label>
+                    <input type="text" value={editForm.location} onChange={e => setEditForm({...editForm, location: e.target.value})} className="w-full border-gray-300 rounded-xl focus:ring-blue-500 focus:border-blue-500 bg-white p-2 border text-sm" required />
+                  </div>
                 </div>
+
                 <div className="flex gap-4">
                    <div className="w-1/2">
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Fecha Inicio</label>
-                    <input type="text" value={editForm.startDate} onChange={e => setEditForm({...editForm, startDate: e.target.value})} className="w-full border-gray-300 rounded-xl focus:ring-blue-500 focus:border-blue-500 bg-white p-2 border" required />
+                    <label className="block text-sm font-medium text-gray-700 mb-1 flex items-center">
+                      <Calendar className="w-3 h-3 mr-1 text-amber-500" /> Fecha Inicio
+                    </label>
+                    <input 
+                      type="date" 
+                      value={editForm.startDate} 
+                      onChange={e => setEditForm({...editForm, startDate: e.target.value})} 
+                      className="w-full border-gray-300 rounded-xl focus:ring-blue-500 focus:border-blue-500 bg-white p-2 border text-sm" 
+                      required 
+                    />
                    </div>
                    <div className="w-1/2">
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Fecha Fin</label>
-                    <input type="text" value={editForm.endDate} onChange={e => setEditForm({...editForm, endDate: e.target.value})} className="w-full border-gray-300 rounded-xl focus:ring-blue-500 focus:border-blue-500 bg-white p-2 border" />
+                    <label className="block text-sm font-medium text-gray-700 mb-1 flex items-center">
+                      <Calendar className="w-3 h-3 mr-1 text-amber-500" /> Fecha Fin
+                    </label>
+                    <input 
+                      type="date" 
+                      value={editForm.endDate} 
+                      onChange={e => setEditForm({...editForm, endDate: e.target.value})} 
+                      className="w-full border-gray-300 rounded-xl focus:ring-blue-500 focus:border-blue-500 bg-white p-2 border text-sm" 
+                    />
                    </div>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Descripción y Logros</label>
-                  <textarea rows={4} value={editForm.description} onChange={e => setEditForm({...editForm, description: e.target.value})} className="w-full border-gray-300 rounded-xl focus:ring-blue-500 focus:border-blue-500 bg-white p-2 border" required />
+                  <div className="flex items-center justify-between mb-2">
+                    <label className="block text-sm font-medium text-gray-700">Descripción y Logros</label>
+                    <button 
+                      type="button" 
+                      onClick={() => setEditForm({...editForm, description: [...editForm.description, ""]})}
+                      className="text-xs bg-blue-50 text-blue-600 px-2 py-1 rounded-lg border border-blue-100 hover:bg-blue-100 transition-colors flex items-center"
+                    >
+                      <Plus className="w-3 h-3 mr-1" /> Añadir Logro
+                    </button>
+                  </div>
+                  <div className="space-y-2">
+                    {editForm.description.map((item, idx) => (
+                      <div key={idx} className="flex items-center space-x-2">
+                        <input 
+                          type="text" 
+                          value={item} 
+                          onChange={e => {
+                            const newDesc = [...editForm.description];
+                            newDesc[idx] = e.target.value;
+                            setEditForm({...editForm, description: newDesc});
+                          }} 
+                          className="w-full border-gray-300 rounded-xl focus:ring-blue-500 focus:border-blue-500 bg-white p-2 border text-sm" 
+                          required 
+                        />
+                        {editForm.description.length > 1 && (
+                          <button 
+                            type="button" 
+                            onClick={() => setEditForm({...editForm, description: editForm.description.filter((_, i) => i !== idx)})}
+                            className="p-2 text-red-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                          >
+                            <X className="w-4 h-4" />
+                          </button>
+                        )}
+                      </div>
+                    ))}
+                  </div>
                 </div>
 
                 <div className="pt-6 mt-4 border-t border-gray-100 flex justify-end gap-3">
@@ -345,7 +439,8 @@ export default function JobsView() {
                       <Briefcase className="w-8 h-8 text-blue-400" />
                    </div>
                    <div>
-                     <h3 className="text-3xl font-bold tracking-tight">{selectedJob.role || selectedJob.title}</h3>
+                     <h3 className="text-3xl font-bold tracking-tight">{selectedJob.position || selectedJob.role || selectedJob.title}</h3>
+                     <p className="text-blue-200 text-sm opacity-80">{selectedJob.typePosition} • {selectedJob.location}</p>
                    </div>
                 </div>
               </div>
@@ -358,13 +453,23 @@ export default function JobsView() {
                   </div>
                   <div className="flex items-center text-gray-600 bg-gray-50 px-4 py-2 rounded-lg border border-gray-100">
                     <Calendar className="w-5 h-5 mr-2 text-gray-400" />
-                    <span>{selectedJob.startDate} — {selectedJob.endDate || "Presente"}</span>
+                    <span>{selectedJob.startDate ? selectedJob.startDate.split("T")[0] : "--"} — {selectedJob.endDate ? selectedJob.endDate.split("T")[0] : "Presente"}</span>
                   </div>
                 </div>
                 
                 <h4 className="text-sm font-bold text-gray-900 uppercase tracking-wider mb-4 border-b pb-2">Descripción y Logros</h4>
                 <div className="prose prose-sm text-gray-600 leading-relaxed max-w-none">
-                  {selectedJob.description ? <p>{selectedJob.description}</p> : <p className="text-gray-400 italic">No hay descripción detallada registrada para este puesto.</p>}
+                  {Array.isArray(selectedJob.description) && selectedJob.description.length > 0 ? (
+                    <ul className="list-disc pl-5 space-y-2">
+                       {selectedJob.description.map((item, i) => (
+                         <li key={i}>{item}</li>
+                       ))}
+                    </ul>
+                  ) : selectedJob.description ? (
+                    <p>{selectedJob.description}</p>
+                  ) : (
+                    <p className="text-gray-400 italic">No hay descripción detallada registrada para este puesto.</p>
+                  )}
                 </div>
               </div>
             </motion.div>
