@@ -143,7 +143,11 @@ export default function FacebookFeed({ projects, jobs, profile, searchQuery, act
               <div className="w-16 h-16 bg-gray-50 rounded-full flex items-center justify-center mx-auto">
                 <Search className="w-8 h-8 text-gray-300" />
               </div>
-              <p className="text-gray-500 font-bold">No se encontraron resultados para "{searchQuery}"</p>
+              {searchQuery ? (
+                <p className="text-gray-500 font-bold">No se encontraron resultados para "{searchQuery}"</p>
+              ) : (
+                <p className="text-gray-500 font-bold">Este perfil aún no tiene contenido publicado.</p>
+              )}
             </div>
           ) : (
             <>

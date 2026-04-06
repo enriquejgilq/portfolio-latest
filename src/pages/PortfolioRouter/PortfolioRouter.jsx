@@ -2,9 +2,8 @@ import { useEffect, useState } from "react";
 import { useParams, useLocation } from "react-router-dom";
 import GoogleLayout from "../../layouts/GoogleLayout/GoogleLayout";
 import FacebookLayout from "../../layouts/FacebookLayout/FacebookLayout";
-
-// Si luego quieres agregar layouts, los importarías aquí
-// import TwitterLayout from "../../layouts/TwitterLayout/TwitterLayout";
+import TwitterLayout from "../../layouts/TwitterLayout/TwitterLayout";
+import InstagramLayout from "../../layouts/InstagramLayout/InstagramLayout";
 
 export default function PortfolioRouter() {
   const { username } = useParams();
@@ -65,13 +64,11 @@ export default function PortfolioRouter() {
       return <GoogleLayout username={username} />;
     case "Twitter":
     case "X":
-      // return <TwitterLayout username={username} />;
-      return <div className="p-10">Borrador: Layout Twitter/X para {username}</div>;
+      return <TwitterLayout username={username} />;
     case "Facebook":
       return <FacebookLayout username={username} />;
     case "Instagram":
-      // return <InstagramLayout username={username} />;
-      return <div className="p-10">Borrador: Layout Instagram para {username}</div>;
+      return <InstagramLayout username={username} />;
     default:
       // Fallback a Google
       return <GoogleLayout username={username} />;

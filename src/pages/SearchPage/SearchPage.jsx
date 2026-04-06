@@ -164,7 +164,7 @@ export const SearchPage = ({ username }) => {
           />
         );
       case "4":
-        return <Experience />;
+        return <Experience username={username} />;
       default:
         return null;
     }

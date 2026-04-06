@@ -69,7 +69,18 @@ export default function FacebookLayout({ username }) {
                 <p className="text-gray-500 font-bold mt-1 text-sm md:text-base">{profile.name} • @{profile.username}</p>
                 <div className="flex flex-wrap justify-center md:justify-start gap-4 mt-4 text-gray-500 text-sm font-medium">
                    <div className="flex items-center gap-1"><MapPin className="w-4 h-4" /> {profile.location || "Remoto"}</div>
-                   <div className="flex items-center gap-1 font-bold text-blue-600 hover:underline cursor-pointer"><Globe className="w-4 h-4" /> misitio.com</div>
+                   {jobs && jobs.length > 0 && (() => {
+                     const latestJob = [...jobs].sort((a, b) => {
+                       if (a.endDate === null && b.endDate !== null) return -1;
+                       if (a.endDate !== null && b.endDate === null) return 1;
+                       return new Date(b.startDate) - new Date(a.startDate);
+                     })[0];
+                     return (
+                       <div className="flex items-center gap-1 font-bold text-blue-600">
+                         <Briefcase className="w-4 h-4" /> {latestJob.company} - {latestJob.position}
+                       </div>
+                     );
+                   })()}
                 </div>
               </div>
               <div className="flex items-center gap-2 pb-4">
