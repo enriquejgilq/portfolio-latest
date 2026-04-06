@@ -13,7 +13,7 @@ import { useTheme } from "@mui/material/styles";
 import { format } from "date-fns";
 import Logo from "../../components/Logo";
 
-function Experience() {
+function Experience({ username }) {
   const [loading, setLoading] = useState(false);
   const [experience, setExperience] = useState([]);
 
@@ -25,14 +25,14 @@ function Experience() {
     setLoading(true);
     try {
       const endpoint = "getAllExperience";
-
-      const response = await fetch(`${host}/api/${endpoint}`);
+      const response = await fetch(`${host}/api/${endpoint}?username=${username}`);
 
       if (!response.ok) {
         throw new Error("Error al realizar la búsqueda");
       }
       const data = await response.json();
-      setExperience(data.results);
+      const finalData = Array.isArray(data) ? data : (data.results || []);
+      setExperience(finalData);
       setLoading(false);
     } catch (error) {
       console.error("Error en la búsqueda:", error);
@@ -116,6 +116,7 @@ function Experience() {
                 </Typography>
                 <Typography
                   variant="body2"
+                  component="div"
                   sx={{
                     fontSize: { xs: "0.8rem", sm: "1rem" },
                     color: "text.secondary",
